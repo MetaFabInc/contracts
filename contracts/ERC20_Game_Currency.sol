@@ -28,6 +28,7 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
   constructor(string memory _name, string memory _symbol, uint256 _supplyCap, address _forwarder)
   ERC20(_name, _symbol)
   ERC2771Context_Upgradeable(_forwarder) {
+    feeRecipient = _msgSender();
     supplyCap = _supplyCap;
   }
 
@@ -51,19 +52,19 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
    * @dev Support for transfer batching
    */
 
-  function batchTransfer(address[] calldata recipients, uint256[] calldata amounts) private returns (bool) {
+  function batchTransfer(address[] calldata recipients, uint256[] calldata amounts) external returns (bool) {
     return _batchTransfer(recipients, amounts, false);
   }
 
-  function batchTransferWithRefs(address[] calldata recipients, uint256[] calldata amounts, uint256[] calldata refs) private returns (bool) {
+  function batchTransferWithRefs(address[] calldata recipients, uint256[] calldata amounts, uint256[] calldata refs) external returns (bool) {
     return _batchTransferWithRefs(recipients, amounts, refs, false);
   }
 
-  function batchTransferWithFees(address[] calldata recipients, uint256[] calldata amounts) private returns (bool) {
+  function batchTransferWithFees(address[] calldata recipients, uint256[] calldata amounts) external returns (bool) {
     return _batchTransfer(recipients, amounts, true);
   }
 
-  function batchTransferWithFeesRefs(address[] calldata recipients, uint256[] calldata amounts, uint256[] calldata refs) private returns (bool) {
+  function batchTransferWithFeesRefs(address[] calldata recipients, uint256[] calldata amounts, uint256[] calldata refs) external returns (bool) {
     return _batchTransferWithRefs(recipients, amounts, refs, true);
   }
 
@@ -75,7 +76,7 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
       if (withFee) {
         transferWithFee(recipients[i], amounts[i]);
       } else {
-        transferFrom(_msgSender(), recipients[i], amounts[i]);
+        transfer(recipients[i], amounts[i]);
       }
     }
 
@@ -91,7 +92,7 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
       if (withFee) {
         transferWithFee(recipients[i], amounts[i]);
       } else {
-        transferFrom(_msgSender(), recipients[i], amounts[i]);
+        transfer(recipients[i], amounts[i]);
       }
 
       if (refs[i] > 0) {
@@ -130,19 +131,14 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
    * @dev Support for fee based transfers, typically used with gasless transactions
    */
 
-  function burnWithFee(uint256 amount) external {
-    transferWithFee(address(0), amount);
+  function burnWithFee(uint256 amount) external returns (bool) { // TODO, can't use _transfer to 0 addr
+    _transferWithFee(address(0), amount, true);
+
+    return true;
   }
 
   function transferWithFee(address recipient, uint256 amount) public returns (bool) {
-    uint senderBalance = balanceOf(_msgSender());
-    require(senderBalance >= amount, "ERC20: transfer amount exceeds balance.");
-
-    uint percentageFee = amount * feeBps / 10000 + feeFixed;
-    uint fee = percentageFee <= feeCap ? percentageFee : feeCap;
-
-    _transfer(_msgSender(), feeRecipient, fee);
-    _transfer(_msgSender(), recipient, amount - fee);
+    _transferWithFee(recipient, amount, false);
 
     return true;
   }
@@ -151,6 +147,23 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
     transferWithFee(recipient, amount);
     emit TransferRef(_msgSender(), recipient, amount, ref);
     return true;
+  }
+
+  function _transferWithFee(address recipient, uint256 amount, bool isBurn) private {
+    uint senderBalance = balanceOf(_msgSender());
+    require(feeRecipient != address(0), "Fee recipient not set, cannot use transferWithFee");
+    require(senderBalance >= amount, "ERC20: transfer amount exceeds balance.");
+
+    uint percentageFee = amount * feeBps / 10000 + feeFixed;
+    uint fee = percentageFee <= feeCap ? percentageFee : feeCap;
+
+    _transfer(_msgSender(), feeRecipient, fee);
+
+    if (isBurn) {
+      _burn(_msgSender(), amount - fee);
+    } else {
+      _transfer(_msgSender(), recipient, amount - fee);
+    }
   }
 
   function setFees(uint _feeBps, uint _feeFixed, uint _feeCap) external onlyOwner {

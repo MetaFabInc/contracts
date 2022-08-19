@@ -30,7 +30,7 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
 
   mapping(address => mapping(uint256 => bool)) private _nonces;
 
-  constructor() EIP712("WRLD_Forwarder_Polygon", "1.0.0") {}
+  constructor() EIP712("ERC2771_Trusted_Forwarder", "1.0.0") {}
 
   function verify(ForwardRequest calldata req, bytes calldata signature) public view returns (bool) {
     address signer = _hashTypedDataV4(
@@ -41,7 +41,7 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
   }
 
   function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {
-    require(verify(req, signature), "WRLD_Forwarder_Polygon: signature does not match request");
+    require(verify(req, signature), "ERC2771_Trusted_Forwarder: signature does not match request or nonce has been used");
 
     _nonces[req.from][req.nonce] = true;
 
