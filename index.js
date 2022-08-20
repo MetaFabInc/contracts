@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const contracts = {};
 
@@ -21,6 +22,6 @@ const recurseContracts = rootDirectory => {
   }
 }
 
-recurseContracts('./artifacts/contracts');
+recurseContracts(path.join(__dirname, './artifacts/contracts'));
 
 module.exports = contracts;
