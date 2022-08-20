@@ -145,7 +145,9 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
 
   function transferWithFeeRef(address recipient, uint256 amount, uint256 ref) external returns (bool) {
     transferWithFee(recipient, amount);
+
     emit TransferRef(_msgSender(), recipient, amount, ref);
+
     return true;
   }
 
