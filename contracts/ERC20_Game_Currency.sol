@@ -18,7 +18,7 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
   uint public feeBps;
   uint public feeFixed;
   uint public feeCap;
-  address private feeRecipient;
+  address public feeRecipient;
   address public childChainManagerProxy;
   uint256 public immutable supplyCap;
 
@@ -168,15 +168,12 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
     }
   }
 
-  function setFees(uint _feeBps, uint _feeFixed, uint _feeCap) external onlyOwner {
+  function setFees(address recipient, uint _feeBps, uint _feeFixed, uint _feeCap) external onlyOwner {
+    require(recipient != address(0), "recipient is 0 addr");
+    feeRecipient = recipient;
     feeBps = _feeBps;
     feeFixed = _feeFixed;
     feeCap = _feeCap;
-  }
-
-  function setFeeRecipient(address recipient) external onlyOwner {
-    require(recipient != address(0), "recipient is 0 addr");
-    feeRecipient = recipient;
   }
 
   /**

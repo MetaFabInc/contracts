@@ -237,8 +237,7 @@ describe('ERC20_Game_Currency', () => {
       const basisPoints = 50;
       const fixedFee = getTokenDecimalAmount(50);
       const feeCap = getTokenDecimalAmount(1000);
-      await tokenContract.setFeeRecipient(feeRecipientAddress);
-      await tokenContract.setFees(basisPoints, fixedFee, feeCap);
+      await tokenContract.setFees(feeRecipientAddress, basisPoints, fixedFee, feeCap);
 
       const recipientAddress = otherAddresses[1].address;
       const transferAmount = getTokenDecimalAmount(10000);
@@ -266,8 +265,7 @@ describe('ERC20_Game_Currency', () => {
       const basisPoints = 50;
       const fixedFee = getTokenDecimalAmount(50);
       const feeCap = getTokenDecimalAmount(1000);
-      await tokenContract.setFeeRecipient(feeRecipientAddress);
-      await tokenContract.setFees(basisPoints, fixedFee, feeCap);
+      await tokenContract.setFees(feeRecipientAddress, basisPoints, fixedFee, feeCap);
 
       const recipientAddress = otherAddresses[1].address;
       const transferAmount = getTokenDecimalAmount(10000);
@@ -324,7 +322,7 @@ describe('ERC20_Game_Currency', () => {
       await expect(
         tokenContract
           .connect(otherAddresses[1])
-          .setFeeRecipient(otherAddresses[2].address),
+          .setFees(otherAddresses[2].address, 0, 0, 0),
       ).to.be.reverted;
     });
 
