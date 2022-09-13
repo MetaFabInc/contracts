@@ -1,5 +1,8 @@
 {
   "name": "metafab-contracts",
+  "description": "Template contracts deployed by MetaFab.",
+  "homepage": "https://trymetafab.com",
+  "version": "0.1.0",
   "scripts": {
     "test": "npx hardhat test",
     "postinstall": "npx hardhat compile"
