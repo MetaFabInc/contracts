@@ -4,7 +4,7 @@
   "homepage": "https://trymetafab.com",
   "version": "0.1.2",
   "scripts": {
-    "test": "npx hardhat test",
+    "test": "npx hardhat test"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
