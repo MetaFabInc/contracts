@@ -34,7 +34,7 @@ contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessContro
     return itemURIs[_itemId];
   }
 
-  function setItemURI(uint256 _itemId, string memory _uri) public onlyRole(OWNER_ROLE) {
+  function setItemURI(uint256 _itemId, string memory _uri) external onlyRole(OWNER_ROLE) {
     itemURIs[_itemId] = _uri;
   }
 
@@ -48,7 +48,7 @@ contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessContro
     return itemTransferTimelocks[_itemId] < block.timestamp;
   }
 
-  function setItemTransferTimelock(uint256 _itemId, uint256 _unlockTimestamp) external {
+  function setItemTransferTimelock(uint256 _itemId, uint256 _unlockTimestamp) external onlyRole(OWNER_ROLE) {
     itemTransferTimelocks[_itemId] = _unlockTimestamp;
   }
 
