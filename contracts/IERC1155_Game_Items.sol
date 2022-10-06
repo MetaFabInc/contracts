@@ -13,6 +13,11 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 interface IERC1155_Game_Items is IERC1155, IAccessControl  {
+  // getters
+  function itemURIs(uint256) external view returns(string memory);
+  function itemTransferTimelocks(uint256) external view returns(uint256);
+
+  // functions
   function setItemURI(uint256 _itemId, string memory _uri) external;
   function bulkSetItemURIs(uint256[] calldata _itemIds, string[] memory _uris) external;
   function isItemTransferrable(uint256 _itemId) external view;

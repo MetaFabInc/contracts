@@ -11,12 +11,9 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 import "./common/ERC2771Context_Upgradeable.sol";
 
 contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessControl {
-  using Strings for uint256;
-
   mapping(uint256 => string) public itemURIs;
   mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp, 0 timestamp = never transferrable.
 
@@ -120,7 +117,7 @@ contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessContro
   }
 
   /**
-   * @dev
+   * @dev ERC165
    */
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
