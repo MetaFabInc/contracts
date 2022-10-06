@@ -75,11 +75,19 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
   }
 
   function purchase(bytes32 _itemOfferId) external payable nonReentrant {
+    require(_itemOfferIsActive(ItemOfferType.BUYABLE, _itemOfferId), "itemOfferId is not a valid buyable offer.");
 
+    ItemOffer storage itemOffer = buyableItemOffers[_itemOfferId];
+
+    // in progress..
   }
 
   function sell(bytes32 _itemOfferId) external nonReentrant {
+    require(_itemOfferIsActive(ItemOfferType.SELLABLE, _itemOfferId), "itemOfferId is not a valid sellable offer.");
 
+    ItemOffer storage itemOffer = sellableItemOffers[_itemOfferId];
+
+    // in progress..
   }
 
   /*
