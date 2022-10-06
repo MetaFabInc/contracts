@@ -11,18 +11,17 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./common/ERC2771Context_Upgradeable.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "./IERC20_Game_Currency.sol";
+import "../common/ERC2771Context_Upgradeable.sol";
 
-contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
-  uint public feeBps;
-  uint public feeFixed;
-  uint public feeCap;
+contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgradeable, Ownable, ERC165 {
+  uint256 public feeBps;
+  uint256 public feeFixed;
+  uint256 public feeCap;
   address public feeRecipient;
   address public childChainManagerProxy;
   uint256 public immutable supplyCap;
-
-  event TransferRef(address indexed sender, address indexed recipient, uint256 amount, uint256 ref);
-  event BatchTransferRef(address indexed sender, address[] recipients, uint256[] amounts, uint256[] refs);
 
   constructor(string memory _name, string memory _symbol, uint256 _supplyCap, address _forwarder)
   ERC20(_name, _symbol)
@@ -151,12 +150,12 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
   }
 
   function _transferWithFee(address recipient, uint256 amount, bool isBurn) private {
-    uint senderBalance = balanceOf(_msgSender());
+    uint256 senderBalance = balanceOf(_msgSender());
     require(feeRecipient != address(0), "Fee recipient not set, cannot use transferWithFee");
     require(senderBalance >= amount, "ERC20: transfer amount exceeds balance.");
 
-    uint percentageFee = amount * feeBps / 10000 + feeFixed;
-    uint fee = percentageFee <= feeCap ? percentageFee : feeCap;
+    uint256 percentageFee = amount * feeBps / 10000 + feeFixed;
+    uint256 fee = percentageFee <= feeCap ? percentageFee : feeCap;
 
     _transfer(_msgSender(), feeRecipient, fee);
 
@@ -167,7 +166,7 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
     }
   }
 
-  function setFees(address recipient, uint _feeBps, uint _feeFixed, uint _feeCap) external onlyOwner {
+  function setFees(address recipient, uint256 _feeBps, uint256 _feeFixed, uint256 _feeCap) external onlyOwner {
     require(recipient != address(0), "recipient is 0 addr");
     feeRecipient = recipient;
     feeBps = _feeBps;
@@ -201,5 +200,13 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
     }
 
     super._mint(_account, _amount);
+  }
+
+  /**
+   * @dev ERC165
+   */
+
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+    return interfaceId == type(IERC20_Game_Currency).interfaceId || super.supportsInterface(interfaceId);
   }
 }

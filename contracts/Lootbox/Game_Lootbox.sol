@@ -10,10 +10,11 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./IERC1155_Game_Items.sol";
-import "./common/ERC2771Context_Upgradeable.sol";
+import "../Items/IERC1155_Game_Items.sol";
+import "../Currency/IERC20_Game_Currency.sol";
+import "../common/ERC2771Context_Upgradeable.sol";
 
-contract Game_Items_Merchant is ERC2771Context_Upgradeable, AccessControl {
+contract Game_Items_Lootbox is ERC2771Context_Upgradeable, AccessControl {
   bytes32 private constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
   constructor(address _forwarder)

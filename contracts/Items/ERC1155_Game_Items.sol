@@ -11,10 +11,13 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "./common/ERC2771Context_Upgradeable.sol";
+import "./IERC1155_Game_Items.sol";
+import "../common/ERC2771Context_Upgradeable.sol";
 
-contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessControl {
-  mapping(uint256 => string) public itemURIs;
+contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgradeable, AccessControl {
+  uint256[] public itemIds;
+  mapping(uint256 => uint256) public itemSupplies; // itemId => minted item supply
+  mapping(uint256 => string) public itemURIs; // itemId => complete metadata uri
   mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp, 0 timestamp = never transferrable.
 
   bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -25,6 +28,14 @@ contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessContro
   ERC2771Context_Upgradeable(_forwarder) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     _setupRole(OWNER_ROLE, _msgSender());
+  }
+
+  function allItemIds() external view returns (uint256[] memory) {
+    return itemIds;
+  }
+
+  function totalItemIds() external view returns(uint256) {
+    return itemIds.length;
   }
 
   function uri(uint256 _itemId) public view override returns (string memory) {
@@ -39,6 +50,10 @@ contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessContro
     for (uint256 i = 0; i < _itemIds.length; i++) {
       itemURIs[_itemIds[i]] = _uris[i];
     }
+  }
+
+  function itemExists(uint256 _itemId) external view returns (bool) {
+    return itemSupplies[_itemId] > 0;
   }
 
   function isItemTransferrable(uint256 _itemId) public view returns (bool) {
@@ -109,19 +124,36 @@ contract ERC1155_Game_Items is ERC1155, ERC2771Context_Upgradeable, AccessContro
     uint256[] memory amounts,
     bytes memory data
   ) internal virtual override {
-    for (uint256 i = 0; i < ids.length; i++) {
-      require(isItemTransferrable(ids[i]), "Item is not currently transferable.");
-    }
-
     super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+
+    for (uint256 i = 0; i < ids.length; i++) {
+      uint256 id = ids[i];
+
+      require(isItemTransferrable(id), "Item is not currently transferable.");
+
+      if (from == address(0)) {
+        if (itemSupplies[id] == 0) { // new item
+          itemIds.push(id);
+        }
+
+        itemSupplies[id] += amounts[i];
+      }
+
+      if (to == address(0)) {
+        require(itemSupplies[id] > amounts[i], "ERC1155: burn amount exceeds itemSupply");
+        unchecked {
+          itemSupplies[id] = itemSupplies[id] - amounts[i];
+        }
+      }
+    }
   }
 
   /**
    * @dev ERC165
    */
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, AccessControl) returns (bool) {
-    return super.supportsInterface(interfaceId);
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, IERC165, AccessControl) returns (bool) {
+    return interfaceId == type(IERC1155_Game_Items).interfaceId || super.supportsInterface(interfaceId);
   }
 
   /**
