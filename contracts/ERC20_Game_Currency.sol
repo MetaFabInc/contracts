@@ -130,7 +130,7 @@ contract ERC20_Game_Currency is ERC20, ERC2771Context_Upgradeable, Ownable {
    * @dev Support for fee based transfers, typically used with gasless transactions
    */
 
-  function burnWithFee(uint256 amount) external returns (bool) { // TODO, can't use _transfer to 0 addr
+  function burnWithFee(uint256 amount) external returns (bool) {
     _transferWithFee(address(0), amount, true);
 
     return true;
