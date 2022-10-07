@@ -23,15 +23,12 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
   bytes32 private constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
   struct ItemOffer {
-    uint256 itemId;
-    uint256 currencyAmount;
-    bool exists;
     bool isActive;
-    bool isGameCurrency;
-    bool isNativeCurrency;
+    uint256[] itemIds;
+    uint256[] itemAmounts;
+    uint256 currencyAmount;
     IERC1155_Game_Items items;
-    IERC20 erc20Currency;
-    IERC20_Game_Currency erc20GameCurrency;
+    IERC20 currency;
   }
 
   bytes32[] public buyableItemOfferIds; // array of itemOfferIds
@@ -46,24 +43,24 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     _setupRole(OWNER_ROLE, _msgSender());
   }
 
-  function setBuyableItemOffer(address _itemsAddress, uint256 _itemId, address _currencyAddress, uint256 _currencyAmount) external onlyRole(OWNER_ROLE) {
-    _setItemOffer(ItemOfferType.BUYABLE, _itemsAddress, _currencyAddress, _itemId, _currencyAmount);
+  function setBuyableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount) external onlyRole(OWNER_ROLE) {
+    _setItemOffer(ItemOfferType.BUYABLE, _itemsAddress, _itemIds, _itemAmounts, _currencyAddress, _currencyAmount);
   }
 
   function removeBuyableItemOffer(bytes32 _itemOfferId) external onlyRole(OWNER_ROLE) {
     buyableItemOffers[_itemOfferId].isActive = false;
   }
 
-  function setSellableItemOffer(address _itemsAddress, uint256 _itemId, address _currencyAddress, uint256 _currencyAmount) external onlyRole(OWNER_ROLE) {
-    _setItemOffer(ItemOfferType.SELLABLE, _itemsAddress, _currencyAddress, _itemId, _currencyAmount);
+  function setSellableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount) external onlyRole(OWNER_ROLE) {
+    _setItemOffer(ItemOfferType.SELLABLE, _itemsAddress, _itemIds, _itemAmounts, _currencyAddress, _currencyAmount);
   }
 
   function removeSellableItemOffer(bytes32 _itemOfferId) external onlyRole(OWNER_ROLE)  {
     sellableItemOffers[_itemOfferId].isActive = false;
   }
 
-  function generateItemOfferId(address _itemsAddress, address _currencyAddress, uint256 _itemId) public pure returns(bytes32) {
-    return keccak256(abi.encodePacked(_itemsAddress, _currencyAddress, _itemId));
+  function generateItemOfferId(address _itemsAddress, address _currencyAddress, uint256[] calldata _itemIds) public pure returns(bytes32) {
+    return keccak256(abi.encodePacked(_itemsAddress, _currencyAddress, _itemIds));
   }
 
   function totalBuyableItemOffers() external view returns (uint256) {
@@ -74,46 +71,64 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     return sellableItemOfferIds.length;
   }
 
-  function purchase(bytes32 _itemOfferId) external payable nonReentrant {
+  function buy(bytes32 _itemOfferId) external payable nonReentrant {
     require(_itemOfferIsActive(ItemOfferType.BUYABLE, _itemOfferId), "itemOfferId is not a valid buyable offer.");
 
     ItemOffer storage itemOffer = buyableItemOffers[_itemOfferId];
+    bool isERC20 = address(itemOffer.currency) != address(0);
 
-    // in progress..
+    if (isERC20) {
+      itemOffer.currency.transferFrom(_msgSender(), address(this), itemOffer.currencyAmount);
+    } else {
+      require(msg.value >= itemOffer.currencyAmount);
+    }
+
+    if (_merchantCanMint(address(itemOffer.items))) {
+      itemOffer.items.mintBatchToAddress(_msgSender(), itemOffer.itemIds, itemOffer.itemAmounts);
+    } else {
+      itemOffer.items.safeBatchTransferFrom(address(this), _msgSender(), itemOffer.itemIds, itemOffer.itemAmounts, "");
+    }
   }
 
   function sell(bytes32 _itemOfferId) external nonReentrant {
     require(_itemOfferIsActive(ItemOfferType.SELLABLE, _itemOfferId), "itemOfferId is not a valid sellable offer.");
 
     ItemOffer storage itemOffer = sellableItemOffers[_itemOfferId];
+    bool isERC20 = address(itemOffer.currency) != address(0);
 
-    // in progress..
+    itemOffer.items.safeBatchTransferFrom(_msgSender(), address(this), itemOffer.itemIds, itemOffer.itemAmounts, "");
+
+    if (isERC20) {
+      if (_merchantCanMint(address(itemOffer.currency))) {
+        IERC20_Game_Currency gameCurrency = IERC20_Game_Currency(address(itemOffer.currency));
+        gameCurrency.mint(_msgSender(), itemOffer.currencyAmount);
+      } else {
+        itemOffer.currency.transfer(_msgSender(), itemOffer.currencyAmount);
+      }
+    } else {
+      payable(_msgSender()).transfer(itemOffer.currencyAmount);
+    }
   }
 
   /*
    * @dev Private helpers
    */
 
-  function _setItemOffer(ItemOfferType _type, address _itemsAddress, address _currencyAddress, uint256 _itemId, uint256 _currencyAmount) private {
+  function _setItemOffer(ItemOfferType _type, address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount) private {
     IERC1155_Game_Items items = IERC1155_Game_Items(_itemsAddress);
-    IERC20 erc20Currency = IERC20(_currencyAddress);
-    IERC20_Game_Currency erc20GameCurrency = IERC20_Game_Currency(_currencyAddress);
+    IERC20 currency = IERC20(_currencyAddress);
 
     require(items.supportsInterface(type(IERC1155_Game_Items).interfaceId), "Invalid items contract");
 
-    bytes32 itemOfferId = generateItemOfferId(_itemsAddress, _currencyAddress, _itemId);
-    bool isGameCurrency = erc20GameCurrency.supportsInterface(type(IERC20_Game_Currency).interfaceId);
+    bytes32 itemOfferId = generateItemOfferId(_itemsAddress, _currencyAddress, _itemIds);
 
     ItemOffer memory itemOffer = ItemOffer({
-      itemId: _itemId,
-      currencyAmount: _currencyAmount,
-      exists: true,
       isActive: true,
-      isGameCurrency: isGameCurrency,
-      isNativeCurrency: _currencyAddress == address(0),
+      itemIds: _itemIds,
+      itemAmounts: _itemAmounts,
+      currencyAmount: _currencyAmount,
       items: items,
-      erc20Currency: erc20Currency,
-      erc20GameCurrency: erc20GameCurrency
+      currency: currency
     });
 
     if (!_itemOfferExists(_type, itemOfferId)) {
@@ -129,14 +144,20 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
 
   function _itemOfferExists(ItemOfferType _type, bytes32 _itemOfferId) private view returns (bool) {
     return _type == ItemOfferType.BUYABLE
-      ? buyableItemOffers[_itemOfferId].exists
-      : sellableItemOffers[_itemOfferId].exists;
+      ? address(buyableItemOffers[_itemOfferId].items) != address(0)
+      : address(sellableItemOffers[_itemOfferId].items) != address(0);
   }
 
   function _itemOfferIsActive(ItemOfferType _type, bytes32 _itemOfferId) private view returns (bool) {
     return _type == ItemOfferType.BUYABLE
       ? buyableItemOffers[_itemOfferId].isActive
       : sellableItemOffers[_itemOfferId].isActive;
+  }
+
+  function _merchantCanMint(address _contractAddress) private view returns (bool) {
+    IAccessControl accessControlCheck = IAccessControl(_contractAddress);
+
+    return accessControlCheck.hasRole(keccak256("MINTER_ROLE"), address(this));
   }
 
   /**
