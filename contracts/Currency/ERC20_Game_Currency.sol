@@ -14,17 +14,15 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IERC20_Game_Currency.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
+import "../common/Roles.sol";
 
-contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgradeable, AccessControl {
+contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgradeable, Roles, AccessControl {
   uint256 public feeBps;
   uint256 public feeFixed;
   uint256 public feeCap;
   address public feeRecipient;
   address public childChainManagerProxy;
   uint256 public immutable supplyCap;
-
-  bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
-  bytes32 private constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
   constructor(string memory _name, string memory _symbol, uint256 _supplyCap, address _forwarder)
   ERC20(_name, _symbol)

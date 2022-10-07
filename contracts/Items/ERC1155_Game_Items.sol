@@ -13,15 +13,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "./IERC1155_Game_Items.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
+import "../common/Roles.sol";
 
-contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgradeable, AccessControl {
+contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgradeable, Roles, AccessControl {
   uint256[] public itemIds;
   mapping(uint256 => uint256) public itemSupplies; // itemId => minted item supply
   mapping(uint256 => string) public itemURIs; // itemId => complete metadata uri
   mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp, 0 timestamp = never transferrable.
-
-  bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
-  bytes32 private constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
   constructor(address _forwarder)
   ERC1155("")
@@ -129,7 +127,7 @@ contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgr
     for (uint256 i = 0; i < ids.length; i++) {
       uint256 id = ids[i];
 
-      require(isItemTransferrable(id), "Item is not currently transferable.");
+      require(from == address(0) || isItemTransferrable(id), "Item is not currently transferable.");
 
       if (from == address(0)) {
         if (itemSupplies[id] == 0) { // new item
