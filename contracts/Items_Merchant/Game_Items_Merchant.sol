@@ -109,6 +109,31 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
   }
 
   /*
+   * @dev Withdrawals
+   */
+
+  function withdraw() external onlyRole(OWNER_ROLE) {
+    payable(_msgSender()).transfer(address(this).balance);
+  }
+
+  function withdrawCurrency(address _currencyAddress) external onlyRole(OWNER_ROLE) {
+    IERC20 currency = IERC20(_currencyAddress);
+
+    currency.transfer(_msgSender(), currency.balanceOf(_msgSender()));
+  }
+
+  function withdrawItems(address _itemsAddress, uint256[] calldata _itemIds) external onlyRole(OWNER_ROLE) {
+    IERC1155 items = IERC1155(_itemsAddress);
+    uint256[] memory itemBalances = new uint256[](_itemIds.length);
+
+    for (uint256 i = 0; i < _itemIds.length; i++) {
+      itemBalances[i] = items.balanceOf(address(this), _itemIds[i]);
+    }
+
+    items.safeBatchTransferFrom(address(this), _msgSender(), _itemIds, itemBalances, "");
+  }
+
+  /*
    * @dev Private helpers
    */
 

@@ -19,7 +19,7 @@ contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgr
   uint256[] public itemIds;
   mapping(uint256 => uint256) public itemSupplies; // itemId => minted item supply
   mapping(uint256 => string) public itemURIs; // itemId => complete metadata uri
-  mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp, 0 timestamp = never transferrable.
+  mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp.
 
   constructor(address _forwarder)
   ERC1155("")

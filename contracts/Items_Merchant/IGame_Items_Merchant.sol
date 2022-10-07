@@ -41,4 +41,7 @@ interface IGame_Items_Merchant  {
   function totalSellableItemOffers() external view returns (uint256);
   function buy(bytes32 _itemOfferId) external payable;
   function sell(bytes32 _itemOfferId) external;
+  function withdraw() external;
+  function withdrawCurrency(address _currencyAddress) external;
+  function withdrawItems(address _itemsAddress, uint256[] calldata _itemIds) external;
 }
