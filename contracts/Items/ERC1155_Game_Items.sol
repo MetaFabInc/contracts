@@ -18,22 +18,14 @@ import "../common/Roles.sol";
 contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgradeable, Roles, AccessControl {
   uint256[] public itemIds;
   mapping(uint256 => uint256) public itemSupplies; // itemId => minted item supply
-  mapping(uint256 => string) public itemURIs; // itemId => complete metadata uri
   mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp.
+  mapping(uint256 => string) private itemURIs; // itemId => complete metadata uri
 
   constructor(address _forwarder)
   ERC1155("")
   ERC2771Context_Upgradeable(_forwarder) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     _setupRole(OWNER_ROLE, _msgSender());
-  }
-
-  function allItemIds() external view returns (uint256[] memory) {
-    return itemIds;
-  }
-
-  function totalItemIds() external view returns(uint256) {
-    return itemIds.length;
   }
 
   function uri(uint256 _itemId) public view override returns (string memory) {
@@ -78,20 +70,84 @@ contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgr
     _burnBatch(_fromAddress, _itemIds, _quantities);
   }
 
-  function burn(uint256 _itemId, uint256 _quantity) external {
-    _burn(_msgSender(), _itemId, _quantity);
-  }
-
-  function bulkSafeTransfer(address[] calldata _toAddresses, uint256 _itemId, uint256 _quantityPerAddress) external {
+  function bulkSafeTransferFrom(address _fromAddress, address[] calldata _toAddresses, uint256 _itemId, uint256 _quantityPerAddress) external {
     for (uint256 i = 0; i < _toAddresses.length; i++) {
-      safeTransferFrom(_msgSender(), _toAddresses[i], _itemId, _quantityPerAddress, "");
+      safeTransferFrom(_fromAddress, _toAddresses[i], _itemId, _quantityPerAddress, "");
     }
   }
 
-  function bulkSafeBatchTransfer(address[] calldata _toAddresses, uint256[] calldata _itemIds, uint256[] calldata _quantitiesPerAddress) external {
+  function bulkSafeBatchTransferFrom(address _fromAddress, address[] calldata _toAddresses, uint256[] calldata _itemIds, uint256[] calldata _quantitiesPerAddress) external {
     for (uint256 i = 0; i < _toAddresses.length; i++) {
-      safeBatchTransferFrom(_msgSender(), _toAddresses[i], _itemIds, _quantitiesPerAddress, "");
+      safeBatchTransferFrom(_fromAddress, _toAddresses[i], _itemIds, _quantitiesPerAddress, "");
     }
+  }
+
+  /**
+   * @dev Pagination
+   */
+
+  function totalItemIds() external view returns(uint256) {
+    return itemIds.length;
+  }
+
+  function allItemIds() external view returns (uint256[] memory) {
+    return itemIds;
+  }
+
+  function allItemSupplies() external view returns (uint256[] memory) {
+    uint256[] memory supplies = new uint256[](itemIds.length);
+
+    for (uint256 i = 0; i < itemIds.length; i++) {
+      supplies[i] = itemSupplies[itemIds[i]];
+    }
+
+    return supplies;
+  }
+
+  function allItemURIs() external view returns (string[] memory) {
+    string[] memory uris = new string[](itemIds.length);
+
+    for (uint256 i = 0; i < itemIds.length; i++) {
+      uris[i] = itemURIs[itemIds[i]];
+    }
+
+    return uris;
+  }
+
+  function paginateItemIds(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[] memory) {
+    uint256 totalPaginatable = itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - itemIdsStartIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= limit ? totalPaginatable : limit;
+    uint256[] memory ids = new uint256[](totalPaginate);
+
+    for (uint256 i = 0; i < totalPaginate; i++) {
+      ids[i] = itemIds[itemIdsStartIndexInclusive + i];
+    }
+
+    return ids;
+  }
+
+  function paginateItemSupplies(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[] memory) {
+    uint256 totalPaginatable = itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - itemIdsStartIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= limit ? totalPaginatable : limit;
+    uint256[] memory supplies = new uint256[](totalPaginate);
+
+    for (uint256 i = 0; i < totalPaginate; i++) {
+      supplies[i] = itemSupplies[itemIds[itemIdsStartIndexInclusive + i]];
+    }
+
+    return supplies;
+  }
+
+  function paginateItemURIs(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (string[] memory) {
+    uint256 totalPaginatable = itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - itemIdsStartIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= limit ? totalPaginatable : limit;
+    string[] memory uris = new string[](totalPaginate);
+
+    for (uint256 i = 0; i < totalPaginate; i++) {
+      uris[i] = itemURIs[itemIds[itemIdsStartIndexInclusive + i]];
+    }
+
+    return uris;
   }
 
   /**
@@ -127,7 +183,16 @@ contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgr
     for (uint256 i = 0; i < ids.length; i++) {
       uint256 id = ids[i];
 
-      require(from == address(0) || isItemTransferrable(id), "Item is not currently transferable.");
+      require(
+        (
+          isItemTransferrable(id) ||
+          from == address(0) || // allow mint
+          hasRole(OWNER_ROLE, from) || // allow owner transfers
+          hasRole(MINTER_ROLE, from) || // allow minter transfers
+          to == address(0) // allow burn
+        ),
+        "Item is not currently transferable."
+      );
 
       if (from == address(0)) {
         if (itemSupplies[id] == 0) { // new item
@@ -138,10 +203,9 @@ contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgr
       }
 
       if (to == address(0)) {
-        require(itemSupplies[id] > amounts[i], "ERC1155: burn amount exceeds itemSupply");
-        unchecked {
-          itemSupplies[id] = itemSupplies[id] - amounts[i];
-        }
+        require(itemSupplies[id] >= amounts[i], "ERC1155: burn amount exceeds itemSupply");
+
+        itemSupplies[id] = itemSupplies[id] - amounts[i];
       }
     }
   }

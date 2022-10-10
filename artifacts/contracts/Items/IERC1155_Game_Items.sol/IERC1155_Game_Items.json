@@ -122,19 +122,6 @@
       "type": "event"
     },
     {
-      "inputs": [],
-      "name": "allItemIds",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
@@ -185,6 +172,11 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
           "internalType": "address[]",
           "name": "_toAddresses",
           "type": "address[]"
@@ -200,13 +192,18 @@
           "type": "uint256[]"
         }
       ],
-      "name": "bulkSafeBatchTransfer",
+      "name": "bulkSafeBatchTransferFrom",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
         {
           "internalType": "address[]",
           "name": "_toAddresses",
@@ -223,7 +220,7 @@
           "type": "uint256"
         }
       ],
-      "name": "bulkSafeTransfer",
+      "name": "bulkSafeTransferFrom",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -242,24 +239,6 @@
         }
       ],
       "name": "bulkSetItemURIs",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_itemId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_quantity",
-          "type": "uint256"
-        }
-      ],
-      "name": "burn",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -432,25 +411,6 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "itemId",
-          "type": "uint256"
-        }
-      ],
-      "name": "itemURIs",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "_toAddress",
           "type": "address"
@@ -492,6 +452,78 @@
       "name": "mintToAddress",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "itemIdsStartIndexInclusive",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "paginateItemIds",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "itemIdsStartIndexInclusive",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "paginateItemSupplies",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "itemIdsStartIndexInclusive",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "paginateItemURIs",
+      "outputs": [
+        {
+          "internalType": "string[]",
+          "name": "",
+          "type": "string[]"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {

@@ -566,6 +566,17 @@ describe('ERC20_Game_Currency', () => {
         )
       ).to.be.reverted;
     });
+
+    it('Should properly upgrade trusted forwarder', async () => {
+      await tokenContract.upgradeTrustedForwarder(otherAddresses[1].address);
+      expect(await tokenContract.isTrustedForwarder(otherAddresses[1].address)).to.equal(true);
+    });
+
+    it('Fails to upgrade trusted forwarder if not owner', async () => {
+      await expect(tokenContract.connect(otherAddresses[0]).upgradeTrustedForwarder(
+        otherAddresses[1].address,
+      )).to.be.reverted;
+    });
 });
 
 /**
