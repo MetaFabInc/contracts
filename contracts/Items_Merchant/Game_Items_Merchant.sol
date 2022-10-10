@@ -31,8 +31,20 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     _setupRole(OWNER_ROLE, _msgSender());
   }
 
-  function getBuyableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
+  /*
+   * @dev Buyable offers
+   */
+
+  function getBuyableItemOfferDetails(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
     return buyableItemOffers[_itemOfferId];
+  }
+
+  function getBuyableItemOfferItemIds(bytes32 _itemOfferId) external view returns (uint256[] memory) {
+    return buyableItemOffers[_itemOfferId].itemIds;
+  }
+
+  function getBuyableItemOfferItemAmounts(bytes32 _itemOfferId) external view returns (uint256[] memory) {
+    return buyableItemOffers[_itemOfferId].itemAmounts;
   }
 
   function setBuyableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
@@ -43,8 +55,20 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     buyableItemOffers[_itemOfferId].isActive = false;
   }
 
-  function getSellableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
+  /*
+   * Sellable offers
+   */
+
+  function getSellableItemOfferDetails(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
     return sellableItemOffers[_itemOfferId];
+  }
+
+  function getSellableItemOfferItemIds(bytes32 _itemOfferId) external view returns (uint256[] memory) {
+    return sellableItemOffers[_itemOfferId].itemIds;
+  }
+
+  function getSellableItemOfferItemAmounts(bytes32 _itemOfferId) external view returns (uint256[] memory) {
+    return sellableItemOffers[_itemOfferId].itemAmounts;
   }
 
   function setSellableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
@@ -66,6 +90,10 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
   function totalSellableItemOffers() external view returns (uint256) {
     return sellableItemOfferIds.length;
   }
+
+  /*
+   * @dev Buy/sell
+   */
 
   function buy(bytes32 _itemOfferId) external payable canUseItemOffer(ItemOfferType.BUYABLE, _itemOfferId) nonReentrant {
     require(_itemOfferIsActive(ItemOfferType.BUYABLE, _itemOfferId), "itemOfferId is not a valid buyable offer.");

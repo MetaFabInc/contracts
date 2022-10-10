@@ -30,6 +30,9 @@ interface IERC1155_Game_Items is IERC1155  {
   function bulkSafeTransferFrom(address _from, address[] calldata _toAddresses, uint256 _itemId, uint256 _quantityPerAddress) external;
   function bulkSafeBatchTransferFrom(address _from, address[] calldata _toAddresses, uint256[] calldata _itemIds, uint256[] calldata _quantitiesPerAddress) external;
   function totalItemIds() external view returns (uint256);
+  function allItemIds() external view returns (uint256[] memory);
+  function allItemSupplies() external view returns (uint256[] memory);
+  function allItemURIs() external view returns (string[] memory);
   function paginateItemIds(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[] memory);
   function paginateItemSupplies(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[] memory);
   function paginateItemURIs(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (string[] memory);

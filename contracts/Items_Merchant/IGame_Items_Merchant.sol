@@ -30,10 +30,14 @@ interface IGame_Items_Merchant  {
   function sellableItemOfferIds(uint256 index) external view returns (bytes32);
 
   // function
-  function getBuyableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory);
+  function getBuyableItemOfferDetails(bytes32 _itemOfferId) external view returns (ItemOffer memory);
+  function getBuyableItemOfferItemIds(bytes32 _itemOfferId) external view returns (uint256[] memory);
+  function getBuyableItemOfferItemAmounts(bytes32 _itemOfferId) external view returns (uint256[] memory);
   function setBuyableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external;
   function removeBuyableItemOffer(bytes32 _itemOfferId) external;
-  function getSellableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory);
+  function getSellableItemOfferDetails(bytes32 _itemOfferId) external view returns (ItemOffer memory);
+  function getSellableItemOfferItemIds(bytes32 _itemOfferId) external view returns (uint256[] memory);
+  function getSellableItemOfferItemAmounts(bytes32 _itemOfferId) external view returns (uint256[] memory);
   function setSellableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external;
   function removeSellableItemOffer(bytes32 _itemOfferId) external;
   function generateItemOfferId(address _itemsAddress, address _currencyAddress, uint256[] calldata _itemIds) external pure returns(bytes32);

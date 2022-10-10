@@ -72,7 +72,7 @@
           "type": "bytes32"
         }
       ],
-      "name": "getBuyableItemOffer",
+      "name": "getBuyableItemOfferDetails",
       "outputs": [
         {
           "components": [
@@ -133,7 +133,45 @@
           "type": "bytes32"
         }
       ],
-      "name": "getSellableItemOffer",
+      "name": "getBuyableItemOfferItemAmounts",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_itemOfferId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getBuyableItemOfferItemIds",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_itemOfferId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSellableItemOfferDetails",
       "outputs": [
         {
           "components": [
@@ -181,6 +219,44 @@
           "internalType": "struct IGame_Items_Merchant.ItemOffer",
           "name": "",
           "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_itemOfferId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSellableItemOfferItemAmounts",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_itemOfferId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSellableItemOfferItemIds",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
         }
       ],
       "stateMutability": "view",
