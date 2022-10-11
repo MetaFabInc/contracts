@@ -20,10 +20,10 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
   enum ItemOfferType { BUYABLE, SELLABLE }
 
   bytes32[] public buyableItemOfferIds; // array of itemOfferIds
-  mapping(bytes32 => ItemOffer) public buyableItemOffers; // itemOfferId => ItemOffer
+  mapping(bytes32 => ItemOffer) private buyableItemOffers; // itemOfferId => ItemOffer
 
   bytes32[] public sellableItemOfferIds; // array of itemOfferIds
-  mapping(bytes32 => ItemOffer) public sellableItemOffers; // itemOfferId => ItemOffer
+  mapping(bytes32 => ItemOffer) private sellableItemOffers; // itemOfferId => ItemOffer
 
   constructor(address _forwarder)
   ERC2771Context_Upgradeable(_forwarder) {
@@ -35,16 +35,24 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
    * @dev Buyable offers
    */
 
-  function getBuyableItemOfferDetails(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
+  function getBuyableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
     return buyableItemOffers[_itemOfferId];
   }
 
-  function getBuyableItemOfferItemIds(bytes32 _itemOfferId) external view returns (uint256[] memory) {
-    return buyableItemOffers[_itemOfferId].itemIds;
+  function paginateBuyableItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns (ItemOffer[] memory) {
+    uint256 totalPaginatable = _startIndexInclusive < buyableItemOfferIds.length ? buyableItemOfferIds.length - _startIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
+    ItemOffer[] memory itemOffers = new ItemOffer[](totalPaginate);
+
+    for (uint256 i = 0; i < totalPaginate; i++) {
+      itemOffers[i] = buyableItemOffers[buyableItemOfferIds[_startIndexInclusive + i]];
+    }
+
+    return itemOffers;
   }
 
-  function getBuyableItemOfferItemAmounts(bytes32 _itemOfferId) external view returns (uint256[] memory) {
-    return buyableItemOffers[_itemOfferId].itemAmounts;
+  function totalBuyableItemOffers() external view returns (uint256) {
+    return buyableItemOfferIds.length;
   }
 
   function setBuyableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
@@ -63,12 +71,20 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     return sellableItemOffers[_itemOfferId];
   }
 
-  function getSellableItemOfferItemIds(bytes32 _itemOfferId) external view returns (uint256[] memory) {
-    return sellableItemOffers[_itemOfferId].itemIds;
+  function paginateSellableItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns (ItemOffer[] memory) {
+    uint256 totalPaginatable = _startIndexInclusive < sellableItemOfferIds.length ? sellableItemOfferIds.length - _startIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
+    ItemOffer[] memory itemOffers = new ItemOffer[](totalPaginate);
+
+    for (uint256 i = 0; i < totalPaginate; i++) {
+      itemOffers[i] = sellableItemOffers[sellableItemOfferIds[_startIndexInclusive + i]];
+    }
+
+    return itemOffers;
   }
 
-  function getSellableItemOfferItemAmounts(bytes32 _itemOfferId) external view returns (uint256[] memory) {
-    return sellableItemOffers[_itemOfferId].itemAmounts;
+  function totalSellableItemOffers() external view returns (uint256) {
+    return sellableItemOfferIds.length;
   }
 
   function setSellableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
@@ -79,16 +95,12 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     sellableItemOffers[_itemOfferId].isActive = false;
   }
 
+  /*
+   * @dev Offer IDs
+   */
+
   function generateItemOfferId(address _itemsAddress, address _currencyAddress, uint256[] calldata _itemIds) public pure returns(bytes32) {
     return keccak256(abi.encodePacked(_itemsAddress, _currencyAddress, _itemIds));
-  }
-
-  function totalBuyableItemOffers() external view returns (uint256) {
-    return buyableItemOfferIds.length;
-  }
-
-  function totalSellableItemOffers() external view returns (uint256) {
-    return sellableItemOfferIds.length;
   }
 
   /*

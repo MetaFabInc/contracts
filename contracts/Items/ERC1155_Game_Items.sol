@@ -114,37 +114,37 @@ contract ERC1155_Game_Items is IERC1155_Game_Items, ERC1155, ERC2771Context_Upgr
     return uris;
   }
 
-  function paginateItemIds(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[] memory) {
-    uint256 totalPaginatable = itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - itemIdsStartIndexInclusive : 0;
-    uint256 totalPaginate = totalPaginatable <= limit ? totalPaginatable : limit;
+  function paginateItemIds(uint256 _itemIdsStartIndexInclusive, uint256 _limit) external view returns (uint256[] memory) {
+    uint256 totalPaginatable = _itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - _itemIdsStartIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
     uint256[] memory ids = new uint256[](totalPaginate);
 
     for (uint256 i = 0; i < totalPaginate; i++) {
-      ids[i] = itemIds[itemIdsStartIndexInclusive + i];
+      ids[i] = itemIds[_itemIdsStartIndexInclusive + i];
     }
 
     return ids;
   }
 
-  function paginateItemSupplies(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[] memory) {
-    uint256 totalPaginatable = itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - itemIdsStartIndexInclusive : 0;
-    uint256 totalPaginate = totalPaginatable <= limit ? totalPaginatable : limit;
+  function paginateItemSupplies(uint256 _itemIdsStartIndexInclusive, uint256 _limit) external view returns (uint256[] memory) {
+    uint256 totalPaginatable = _itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - _itemIdsStartIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
     uint256[] memory supplies = new uint256[](totalPaginate);
 
     for (uint256 i = 0; i < totalPaginate; i++) {
-      supplies[i] = itemSupplies[itemIds[itemIdsStartIndexInclusive + i]];
+      supplies[i] = itemSupplies[itemIds[_itemIdsStartIndexInclusive + i]];
     }
 
     return supplies;
   }
 
-  function paginateItemURIs(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (string[] memory) {
-    uint256 totalPaginatable = itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - itemIdsStartIndexInclusive : 0;
-    uint256 totalPaginate = totalPaginatable <= limit ? totalPaginatable : limit;
+  function paginateItemURIs(uint256 _itemIdsStartIndexInclusive, uint256 _limit) external view returns (string[] memory) {
+    uint256 totalPaginatable = _itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - _itemIdsStartIndexInclusive : 0;
+    uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
     string[] memory uris = new string[](totalPaginate);
 
     for (uint256 i = 0; i < totalPaginate; i++) {
-      uris[i] = itemURIs[itemIds[itemIdsStartIndexInclusive + i]];
+      uris[i] = itemURIs[itemIds[_itemIdsStartIndexInclusive + i]];
     }
 
     return uris;

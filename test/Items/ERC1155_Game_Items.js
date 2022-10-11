@@ -490,7 +490,7 @@ describe('ERC155_Game_Items', () => {
    * Helpers
    */
 
-  function mintItemToAddress(toAddress, itemId, quantity) {
+  async function mintItemToAddress(toAddress, itemId, quantity) {
     return itemsContract.connect(owner).mintToAddress(toAddress, itemId, quantity);
   }
 
