@@ -11,12 +11,13 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "./IGame_Items_Merchant.sol";
 import "../Currency/IERC20_Game_Currency.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
 
-contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable, Roles, AccessControl, ReentrancyGuard {
+contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable, Roles, AccessControl, ReentrancyGuard, ERC1155Holder {
   enum ItemOfferType { BUYABLE, SELLABLE }
 
   bytes32[] public buyableItemOfferIds; // array of itemOfferIds
@@ -34,6 +35,10 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
   /*
    * @dev Buyable offers
    */
+
+  function allBuyableItemOfferIds() external view returns (bytes32[] memory) {
+    return buyableItemOfferIds;
+  }
 
   function getBuyableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
     return buyableItemOffers[_itemOfferId];
@@ -67,7 +72,11 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
    * Sellable offers
    */
 
-  function getSellableItemOfferDetails(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
+  function allSellableItemOfferIds() external view returns (bytes32[] memory) {
+    return sellableItemOfferIds;
+  }
+
+  function getSellableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory) {
     return sellableItemOffers[_itemOfferId];
   }
 
@@ -248,8 +257,11 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
    * @dev ERC165
    */
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl) returns (bool) {
-    return interfaceId == type(IGame_Items_Merchant).interfaceId || super.supportsInterface(interfaceId);
+  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC1155Receiver) returns (bool) {
+    return
+      interfaceId == type(IGame_Items_Merchant).interfaceId ||
+      interfaceId == type(IERC1155Receiver).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 
   /**

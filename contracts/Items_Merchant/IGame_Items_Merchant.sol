@@ -26,12 +26,14 @@ interface IGame_Items_Merchant  {
   }
 
   // function
+  function allBuyableItemOfferIds() external view returns (bytes32[] memory);
   function getBuyableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory);
   function paginateBuyableItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns (ItemOffer[] memory);
   function totalBuyableItemOffers() external view returns (uint256);
   function setBuyableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external;
   function removeBuyableItemOffer(bytes32 _itemOfferId) external;
-  function getSellableItemOfferDetails(bytes32 _itemOfferId) external view returns (ItemOffer memory);
+  function allSellableItemOfferIds() external view returns (bytes32[] memory);
+  function getSellableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory);
   function paginateSellableItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns (ItemOffer[] memory);
   function totalSellableItemOffers() external view returns (uint256);
   function setSellableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external;

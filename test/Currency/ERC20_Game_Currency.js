@@ -1,4 +1,3 @@
-return;
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { BigNumber } = ethers;
@@ -16,8 +15,8 @@ describe('ERC20_Game_Currency', () => {
   beforeEach(async () => {
     const [ _owner, ..._otherAddresses ] = await ethers.getSigners();
 
-    const ERC20_Game_Currency = await ethers.getContractFactory('ERC20_Game_Currency');
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
+    const ERC20_Game_Currency = await ethers.getContractFactory('ERC20_Game_Currency');
 
     owner = _owner;
     otherAddresses = _otherAddresses;
