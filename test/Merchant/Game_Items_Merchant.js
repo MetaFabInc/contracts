@@ -228,25 +228,113 @@ describe('Game_Items_Merchant', () => {
 
     expect(await tokenContract.balanceOf(buyer.address) * 1).to.equal(0);
     expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(itemPrice * 1);
-    expect((await merchantContract.getBuyableItemOffer(offerId)).uses).to.equal(1);
     expect(await itemsContract.balanceOf(buyer.address, itemId) * 1).to.equal(1);
     expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(0);
+    expect((await merchantContract.getBuyableItemOffer(offerId)).uses).to.equal(1);
   });
 
   it('Should process sell offer that mints currency and increment uses', async () => {
+    const sellPrice = getTokenDecimalAmount(15);
 
+    await setGenericItemOffer('sellable', sellPrice, 0, true);
+
+    const seller = otherAddresses[0];
+    const offerId = await merchantContract.sellableItemOfferIds(0);
+    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await itemsContract.mintToAddress(seller.address, itemId, 1);
+    await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
+    await merchantContract.connect(seller).sell(offerId);
+
+    expect(await itemsContract.balanceOf(seller.address, itemId) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(1);
+    expect((await merchantContract.getSellableItemOffer(offerId)).uses).to.equal(1);
+    expect(await tokenContract.balanceOf(seller.address) * 1).to.equal(sellPrice * 1);
   });
 
   it('Should process sell offer that transfers currency', async () => {
+    const sellPrice = getTokenDecimalAmount(15);
 
+    await setGenericItemOffer('sellable', sellPrice, 0, false);
+
+    const seller = otherAddresses[0];
+    const offerId = await merchantContract.sellableItemOfferIds(0);
+    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await itemsContract.mintToAddress(seller.address, itemId, 1);
+    await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
+    await tokenContract.mint(merchantContract.address, sellPrice);
+    await merchantContract.connect(seller).sell(offerId);
+
+    expect(await itemsContract.balanceOf(seller.address, itemId) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(1);
+    expect(await tokenContract.balanceOf(seller.address) * 1).to.equal(sellPrice * 1);
+    expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(0);
+    expect((await merchantContract.getSellableItemOffer(offerId)).uses).to.equal(1);
   });
 
   it('Should process buy offer using native chain token', async () => {
+    const itemPrice = getTokenDecimalAmount(2);
+    const itemId = 3;
 
+    await setItemOffer(
+      'buyable',
+      itemsContract.address,
+      [ itemId ],
+      [ 1 ],
+      ethers.constants.AddressZero,
+      itemPrice,
+      0,
+      true,
+    );
+
+    const buyer = otherAddresses[0];
+    const buyerStartBalance = await buyer.getBalance() * 1; // 10000~
+    const offerId = await merchantContract.buyableItemOfferIds(0);
+
+    await merchantContract.connect(buyer).buy(offerId, {
+      value: itemPrice,
+    });
+
+    expect(await buyer.getBalance() * 1).to.be.below(buyerStartBalance - itemPrice * 1); // less price + gas
+    expect(await buyer.provider.getBalance(merchantContract.address) * 1).to.equal(itemPrice * 1);
+    expect(await itemsContract.balanceOf(buyer.address, itemId) * 1).to.equal(1);
   });
 
   it('Should process sell offer using native chain token', async () => {
+    const sellPrice = getTokenDecimalAmount(2);
+    const itemId = 3;
 
+    await setItemOffer(
+      'sellable',
+      itemsContract.address,
+      [ itemId ],
+      [ 1 ],
+      ethers.constants.AddressZero,
+      sellPrice,
+      0,
+      false,
+    );
+
+    const seller = otherAddresses[0];
+    const sellerStartBalance = await seller.getBalance() * 1; // 10000~
+    const offerId = await merchantContract.sellableItemOfferIds(0);
+
+    // fund merchant
+    await owner.sendTransaction({
+      to: merchantContract.address,
+      value: ethers.utils.parseEther('2.0'),
+    });
+
+    await itemsContract.mintToAddress(seller.address, itemId, 1);
+    await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
+    await merchantContract.connect(seller).sell(offerId);
+
+    expect(await seller.getBalance() * 1).to.be.above(sellerStartBalance) // 0.1 to account for gas.
+    expect(await seller.provider.getBalance(merchantContract.address) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(1);
   });
 
   it('Fails to process buy offer when not approved to mint items and merchant does not own items to fulfill', async () => {

@@ -124,7 +124,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     if (address(itemOffer.currency) != address(0)) { // erc20
       itemOffer.currency.transferFrom(_msgSender(), address(this), itemOffer.currencyAmount);
     } else { // native token
-      require(msg.value >= itemOffer.currencyAmount);
+      require(msg.value >= itemOffer.currencyAmount, "Payment less than cost");
     }
 
     if (_merchantCanMint(address(itemOffer.items))) {
@@ -181,6 +181,12 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
 
     items.safeBatchTransferFrom(address(this), _msgSender(), _itemIds, itemBalances, "");
   }
+
+  /*
+   * @dev Deposits
+   */
+
+  receive() external payable {}
 
   /*
    * @dev Private helpers
