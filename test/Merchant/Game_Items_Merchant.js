@@ -129,6 +129,7 @@ describe('Game_Items_Merchant', () => {
       await setGenericItemOffer('buyable', getTokenDecimalAmount(10), 0);
     }
 
+    await new Promise(resolve => setTimeout(resolve, 500)); // wait
     const offers = await merchantContract.paginateBuyableItemOffers(0, 15); // pagination should not overflow, 15 used to test
 
     expect(offers.length).to.equal(totalOffers);
@@ -332,41 +333,124 @@ describe('Game_Items_Merchant', () => {
     await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
     await merchantContract.connect(seller).sell(offerId);
 
-    expect(await seller.getBalance() * 1).to.be.above(sellerStartBalance) // 0.1 to account for gas.
+    expect(await seller.getBalance() * 1).to.be.above(sellerStartBalance);
     expect(await seller.provider.getBalance(merchantContract.address) * 1).to.equal(0);
     expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(1);
   });
 
   it('Fails to process buy offer when not approved to mint items and merchant does not own items to fulfill', async () => {
+    const itemPrice = getTokenDecimalAmount(10);
 
+    await setGenericItemOffer('buyable', itemPrice, 0, false);
+
+    const buyer = otherAddresses[0];
+    const offerId = await merchantContract.buyableItemOfferIds(0);
+    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await tokenContract.mint(buyer.address, itemPrice);
+    await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
+    await expect(merchantContract.connect(buyer).buy(offerId)).to.be.reverted;
   });
 
   it('Fails to process sell offer when not approved to mint currency and merchant does not own tokens to fulfill', async () => {
+    const sellPrice = getTokenDecimalAmount(15);
 
+    await setGenericItemOffer('sellable', sellPrice, 0, false);
+
+    const seller = otherAddresses[0];
+    const offerId = await merchantContract.sellableItemOfferIds(0);
+    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await itemsContract.mintToAddress(seller.address, itemId, 1);
+    await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
+    await expect(merchantContract.connect(seller).sell(offerId)).to.be.reverted;
   });
 
   it('Fails to process buy offer when max uses have been reached', async () => {
+    const itemPrice = getTokenDecimalAmount(10);
 
+    await setGenericItemOffer('buyable', itemPrice, 1, true);
+
+    const buyer = otherAddresses[0];
+    const offerId = await merchantContract.buyableItemOfferIds(0);
+    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await tokenContract.mint(buyer.address, itemPrice.mul(2));
+    await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
+    await merchantContract.connect(buyer).buy(offerId);
+    await expect(merchantContract.connect(buyer).buy(offerId)).to.be.reverted; // single use
   });
 
   it('Fails to process sell offer when max uses have been reached', async () => {
+    const sellPrice = getTokenDecimalAmount(15);
 
+    await setGenericItemOffer('sellable', sellPrice, 1, true);
+
+    const seller = otherAddresses[0];
+    const offerId = await merchantContract.sellableItemOfferIds(0);
+    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await itemsContract.mintToAddress(seller.address, itemId, 2);
+    await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
+    await merchantContract.connect(seller).sell(offerId);
+    await expect(merchantContract.connect(seller).sell(offerId)).to.be.reverted;
   });
 
   it('Fails to process buy offer when sender does not have enough required token', async () => {
+    const itemPrice = getTokenDecimalAmount(10);
 
+    await setGenericItemOffer('buyable', itemPrice, 1, true);
+
+    const buyer = otherAddresses[0];
+    const offerId = await merchantContract.buyableItemOfferIds(0);
+    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
+    await expect(merchantContract.connect(buyer).buy(offerId)).to.be.reverted;
   });
 
   it('Fails to process sell offer when sender does not have required items', async () => {
+    const sellPrice = getTokenDecimalAmount(15);
 
+    await setGenericItemOffer('sellable', sellPrice, 1, true);
+
+    const seller = otherAddresses[0];
+    const offerId = await merchantContract.sellableItemOfferIds(0);
+    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+    await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
+    await expect(merchantContract.connect(seller).sell(offerId)).to.be.reverted;
   });
 
   it('Fails to set buyable and sellable offers when not owner', async () => {
+    const args = [
+      itemsContract.address,
+      [ 1 ],
+      [ 1 ],
+      tokenContract.address,
+      getTokenDecimalAmount(1),
+      0,
+    ];
 
+    await expect(merchantContract.connect(otherAddresses[0]).setBuyableItemOffer(...args)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).setSellableItemOffer(...args)).to.be.reverted;
   });
 
   it('Fails to remove buyable and sellable offers when not owner', async () => {
+    await setGenericItemOffer('buyable', getTokenDecimalAmount(1), 0, true);
+    await setGenericItemOffer('sellable', getTokenDecimalAmount(1), 0, true);
 
+    const buyableItemOfferId = merchantContract.buyableItemOfferIds(0);
+    const sellableItemOfferId = merchantContract.sellableItemOfferIds(0);
+
+    await expect(merchantContract.connect(otherAddresses[0]).removeBuyableItemOffer(buyableItemOfferId)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).removeSellableItemOffer(sellableItemOfferId)).to.be.reverted;
   });
 
   /*
@@ -374,19 +458,58 @@ describe('Game_Items_Merchant', () => {
    */
 
   it('Should withdraw native chain token', async () => {
+    const depositAmount = getTokenDecimalAmount(150);
+    const ownerStartBalance = await owner.getBalance();
 
+    await otherAddresses[0].sendTransaction({
+      to: merchantContract.address,
+      value: depositAmount,
+    });
+
+    expect(await owner.provider.getBalance(merchantContract.address) * 1).to.equal(depositAmount * 1);
+
+    await merchantContract.withdraw();
+
+    expect(await owner.provider.getBalance(merchantContract.address) * 1).to.equal(0);
+    expect(await owner.getBalance() * 1).to.be.above(ownerStartBalance * 1);
   });
 
   it('Should withdraw erc20 currency tokens', async () => {
+    const depositAmount = getTokenDecimalAmount(175);
 
+    await tokenContract.mint(merchantContract.address, depositAmount);
+    expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(depositAmount * 1);
+    await merchantContract.withdrawCurrency(tokenContract.address);
+    expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(0);
+    expect(await tokenContract.balanceOf(owner.address) * 1).to.equal(depositAmount * 1);
   });
 
   it('Should withdraw erc1155 items', async () => {
+    const itemIds = [ 3, 4 ];
 
+    await itemsContract.mintBatchToAddress(merchantContract.address, itemIds, [ 1, 1 ]);
+    expect(await itemsContract.balanceOf(merchantContract.address, itemIds[0])).to.equal(1);
+    expect(await itemsContract.balanceOf(merchantContract.address, itemIds[1])).to.equal(1);
+    await merchantContract.withdrawItems(itemsContract.address, itemIds);
+    expect(await itemsContract.balanceOf(merchantContract.address, itemIds[0])).to.equal(0);
+    expect(await itemsContract.balanceOf(merchantContract.address, itemIds[1])).to.equal(0);
+    expect(await itemsContract.balanceOf(owner.address, itemIds[0])).to.equal(1);
+    expect(await itemsContract.balanceOf(owner.address, itemIds[1])).to.equal(1);
   });
 
   it('Fails to withdraw when not owner', async () => {
+    await otherAddresses[0].sendTransaction({
+      to: merchantContract.address,
+      value: getTokenDecimalAmount(100),
+    });
 
+    await tokenContract.mint(merchantContract.address, getTokenDecimalAmount(175));
+
+    await itemsContract.mintBatchToAddress(merchantContract.address, [ 3 ], [ 1 ]);
+
+    await expect(merchantContract.connect(otherAddresses[0]).withdraw()).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).withdrawCurrency(tokenContract.address)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).withdrawItems(itemsContract.address, [ 3 ])).to.be.reverted;
   });
 
   /*
@@ -394,15 +517,80 @@ describe('Game_Items_Merchant', () => {
    */
 
   it('Should cover spender gas fees when submitting transactions to forwarder', async () => {
+    const chainId = 31337; // hardhat
+    const sender = otherAddresses[1];
+    const recipient = otherAddresses[2];
 
+    await setGenericItemOffer('buyable', getTokenDecimalAmount(10), 0, true);
+    await tokenContract.mint(sender.address, getTokenDecimalAmount(10));
+    await tokenContract.connect(sender).approve(merchantContract.address, getTokenDecimalAmount(10));
+
+    const offerId = await merchantContract.buyableItemOfferIds(0);
+    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const itemId = offer.itemIds[0];
+
+
+    // create request object
+    const data = [ offerId ];
+    const gasEstimate = await merchantContract.connect(sender).estimateGas.buy(offerId);
+    const callData = merchantContract.interface.encodeFunctionData('buy', data);
+    const forwardRequest = {
+      from: sender.address,
+      to: merchantContract.address,
+      value: getTokenDecimalAmount(0),
+      gas: gasEstimate,
+      nonce: 41,
+      data: callData,
+    };
+
+    // sign message
+    const domain = {
+      chainId,
+      name: 'ERC2771_Trusted_Forwarder',
+      verifyingContract: forwarderContract.address,
+      version: '1.0.0',
+    };
+
+    const types = {
+      ForwardRequest: [
+        { name: 'from', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'gas', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'data', type: 'bytes' },
+      ],
+    };
+
+    const signature = await sender._signTypedData(domain, types, forwardRequest);
+
+    // execute request
+    const externalAccount = owner;
+    const startingExternalAccountBalance = await externalAccount.getBalance() * 1;
+
+    expect(await itemsContract.balanceOf(sender.address, itemId)).to.equal(0);
+    await forwarderContract.connect(externalAccount).execute(forwardRequest, signature);
+    expect(await externalAccount.getBalance() * 1).to.be.below(startingExternalAccountBalance);
+    expect(await itemsContract.balanceOf(sender.address, itemId)).to.equal(1);
+
+    // attempt to re-execute request one, it should fail since the nonce is used
+    await expect(
+      forwarderContract.connect(externalAccount).execute(
+        forwardRequest,
+        signature,
+      )
+    ).to.be.reverted;
   });
 
   it('Should properly upgrade trusted forwarder', async () => {
-
+    await merchantContract.upgradeTrustedForwarder(otherAddresses[1].address);
+    expect(await merchantContract.isTrustedForwarder(otherAddresses[1].address)).to.equal(true);
   });
 
   it('Fails to upgrade trusted forwarder if not owner', async () => {
-
+    await expect(merchantContract.connect(otherAddresses[0]).upgradeTrustedForwarder(
+      otherAddresses[1].address,
+    )).to.be.reverted;
   });
 
   /**

@@ -168,7 +168,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
   function withdrawCurrency(address _currencyAddress) external onlyRole(OWNER_ROLE) {
     IERC20 currency = IERC20(_currencyAddress);
 
-    currency.transfer(_msgSender(), currency.balanceOf(_msgSender()));
+    currency.transfer(_msgSender(), currency.balanceOf(address(this)));
   }
 
   function withdrawItems(address _itemsAddress, uint256[] calldata _itemIds) external onlyRole(OWNER_ROLE) {

@@ -301,10 +301,11 @@ describe('ERC155_Game_Items', () => {
 
     // execute request
     const externalAccount = owner;
-    const externalAccountBalance = await externalAccount.getBalance() * 1;
+    const startingExternalAccountBalance = await externalAccount.getBalance() * 1;
 
+    expect(await itemsContract.balanceOf(recipient.address, itemId)).to.equal(0);
     await forwarderContract.connect(externalAccount).execute(forwardRequest, signature);
-
+    expect(await externalAccount.getBalance() * 1).to.be.below(startingExternalAccountBalance);
     expect(await itemsContract.balanceOf(recipient.address, itemId)).to.equal(transferAmount);
 
     // attempt to re-execute request one, it should fail since the nonce is used
