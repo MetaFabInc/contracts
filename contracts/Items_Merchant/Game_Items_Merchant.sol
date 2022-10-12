@@ -279,7 +279,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
       ? buyableItemOffers[_itemOfferId]
       : sellableItemOffers[_itemOfferId];
 
-    require(itemOffer.maxUses == 0 || itemOffer.uses < itemOffer.maxUses, "");
+    require(itemOffer.maxUses == 0 || itemOffer.uses < itemOffer.maxUses, "Offer has reached max uses.");
     _;
   }
 }
