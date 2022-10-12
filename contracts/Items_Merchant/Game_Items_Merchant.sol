@@ -161,17 +161,17 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
    * @dev Withdrawals
    */
 
-  function withdraw() external onlyRole(OWNER_ROLE) {
-    payable(_msgSender()).transfer(address(this).balance);
+  function withdrawTo(address _to) external onlyRole(OWNER_ROLE) {
+    payable(_to).transfer(address(this).balance);
   }
 
-  function withdrawCurrency(address _currencyAddress) external onlyRole(OWNER_ROLE) {
+  function withdrawCurrencyTo(address _currencyAddress, address _to) external onlyRole(OWNER_ROLE) {
     IERC20 currency = IERC20(_currencyAddress);
 
-    currency.transfer(_msgSender(), currency.balanceOf(address(this)));
+    currency.transfer(_to, currency.balanceOf(address(this)));
   }
 
-  function withdrawItems(address _itemsAddress, uint256[] calldata _itemIds) external onlyRole(OWNER_ROLE) {
+  function withdrawItemsTo(address _itemsAddress, uint256[] calldata _itemIds, address _to) external onlyRole(OWNER_ROLE) {
     IERC1155 items = IERC1155(_itemsAddress);
     uint256[] memory itemBalances = new uint256[](_itemIds.length);
 
@@ -179,7 +179,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
       itemBalances[i] = items.balanceOf(address(this), _itemIds[i]);
     }
 
-    items.safeBatchTransferFrom(address(this), _msgSender(), _itemIds, itemBalances, "");
+    items.safeBatchTransferFrom(address(this), _to, _itemIds, itemBalances, "");
   }
 
   /*

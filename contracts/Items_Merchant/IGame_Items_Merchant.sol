@@ -41,7 +41,7 @@ interface IGame_Items_Merchant  {
   function generateItemOfferId(address _itemsAddress, address _currencyAddress, uint256[] calldata _itemIds) external pure returns(bytes32);
   function buy(bytes32 _itemOfferId) external payable;
   function sell(bytes32 _itemOfferId) external;
-  function withdraw() external;
-  function withdrawCurrency(address _currencyAddress) external;
-  function withdrawItems(address _itemsAddress, uint256[] calldata _itemIds) external;
+  function withdrawTo(address _to) external;
+  function withdrawCurrencyTo(address _currencyAddress, address _to) external;
+  function withdrawItemsTo(address _itemsAddress, uint256[] calldata _itemIds, address _to) external;
 }

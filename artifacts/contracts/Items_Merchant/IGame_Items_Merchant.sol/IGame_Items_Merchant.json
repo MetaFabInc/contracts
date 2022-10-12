@@ -467,21 +467,19 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
           "name": "_currencyAddress",
           "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
         }
       ],
-      "name": "withdrawCurrency",
+      "name": "withdrawCurrencyTo",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -497,9 +495,27 @@
           "internalType": "uint256[]",
           "name": "_itemIds",
           "type": "uint256[]"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
         }
       ],
-      "name": "withdrawItems",
+      "name": "withdrawItemsTo",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "withdrawTo",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
