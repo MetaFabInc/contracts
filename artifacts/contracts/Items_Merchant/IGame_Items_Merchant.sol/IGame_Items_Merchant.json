@@ -46,7 +46,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_itemsAddress",
+          "name": "_itemsCollectionAddress",
           "type": "address"
         },
         {
@@ -114,8 +114,8 @@
               "type": "uint256"
             },
             {
-              "internalType": "contract IERC1155_Game_Items",
-              "name": "items",
+              "internalType": "contract IERC1155_Game_Items_Collection",
+              "name": "itemsCollection",
               "type": "address"
             },
             {
@@ -175,8 +175,8 @@
               "type": "uint256"
             },
             {
-              "internalType": "contract IERC1155_Game_Items",
-              "name": "items",
+              "internalType": "contract IERC1155_Game_Items_Collection",
+              "name": "itemsCollection",
               "type": "address"
             },
             {
@@ -241,8 +241,8 @@
               "type": "uint256"
             },
             {
-              "internalType": "contract IERC1155_Game_Items",
-              "name": "items",
+              "internalType": "contract IERC1155_Game_Items_Collection",
+              "name": "itemsCollection",
               "type": "address"
             },
             {
@@ -307,8 +307,8 @@
               "type": "uint256"
             },
             {
-              "internalType": "contract IERC1155_Game_Items",
-              "name": "items",
+              "internalType": "contract IERC1155_Game_Items_Collection",
+              "name": "itemsCollection",
               "type": "address"
             },
             {
@@ -368,7 +368,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_itemsAddress",
+          "name": "_itemsCollectionAddress",
           "type": "address"
         },
         {
@@ -406,7 +406,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_itemsAddress",
+          "name": "_itemsCollectionAddress",
           "type": "address"
         },
         {
@@ -488,7 +488,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_itemsAddress",
+          "name": "_itemsCollectionAddress",
           "type": "address"
         },
         {

@@ -60,8 +60,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     return buyableItemOfferIds.length;
   }
 
-  function setBuyableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
-    _setItemOffer(ItemOfferType.BUYABLE, _itemsAddress, _itemIds, _itemAmounts, _currencyAddress, _currencyAmount, _maxUses);
+  function setBuyableItemOffer(address _itemsCollectionAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
+    _setItemOffer(ItemOfferType.BUYABLE, _itemsCollectionAddress, _itemIds, _itemAmounts, _currencyAddress, _currencyAmount, _maxUses);
   }
 
   function removeBuyableItemOffer(bytes32 _itemOfferId) external onlyRole(OWNER_ROLE) {
@@ -96,8 +96,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     return sellableItemOfferIds.length;
   }
 
-  function setSellableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
-    _setItemOffer(ItemOfferType.SELLABLE, _itemsAddress, _itemIds, _itemAmounts, _currencyAddress, _currencyAmount, _maxUses);
+  function setSellableItemOffer(address _itemsCollectionAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external onlyRole(OWNER_ROLE) {
+    _setItemOffer(ItemOfferType.SELLABLE, _itemsCollectionAddress, _itemIds, _itemAmounts, _currencyAddress, _currencyAmount, _maxUses);
   }
 
   function removeSellableItemOffer(bytes32 _itemOfferId) external onlyRole(OWNER_ROLE)  {
@@ -108,8 +108,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
    * @dev Offer IDs
    */
 
-  function generateItemOfferId(address _itemsAddress, address _currencyAddress, uint256[] calldata _itemIds) public pure returns(bytes32) {
-    return keccak256(abi.encodePacked(_itemsAddress, _currencyAddress, _itemIds));
+  function generateItemOfferId(address _itemsCollectionAddress, address _currencyAddress, uint256[] calldata _itemIds) public pure returns(bytes32) {
+    return keccak256(abi.encodePacked(_itemsCollectionAddress, _currencyAddress, _itemIds));
   }
 
   /*
@@ -127,10 +127,10 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
       require(msg.value >= itemOffer.currencyAmount, "Payment less than cost");
     }
 
-    if (_merchantCanMint(address(itemOffer.items))) {
-      itemOffer.items.mintBatchToAddress(_msgSender(), itemOffer.itemIds, itemOffer.itemAmounts);
+    if (_merchantCanMint(address(itemOffer.itemsCollection))) {
+      itemOffer.itemsCollection.mintBatchToAddress(_msgSender(), itemOffer.itemIds, itemOffer.itemAmounts);
     } else {
-      itemOffer.items.safeBatchTransferFrom(address(this), _msgSender(), itemOffer.itemIds, itemOffer.itemAmounts, "");
+      itemOffer.itemsCollection.safeBatchTransferFrom(address(this), _msgSender(), itemOffer.itemIds, itemOffer.itemAmounts, "");
     }
 
     itemOffer.uses++;
@@ -141,7 +141,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
 
     ItemOffer storage itemOffer = sellableItemOffers[_itemOfferId];
 
-    itemOffer.items.safeBatchTransferFrom(_msgSender(), address(this), itemOffer.itemIds, itemOffer.itemAmounts, "");
+    itemOffer.itemsCollection.safeBatchTransferFrom(_msgSender(), address(this), itemOffer.itemIds, itemOffer.itemAmounts, "");
 
     if (address(itemOffer.currency) != address(0)) { // erc20
       if (_merchantCanMint(address(itemOffer.currency))) {
@@ -171,8 +171,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     currency.transfer(_to, currency.balanceOf(address(this)));
   }
 
-  function withdrawItemsTo(address _itemsAddress, uint256[] calldata _itemIds, address _to) external onlyRole(OWNER_ROLE) {
-    IERC1155 items = IERC1155(_itemsAddress);
+  function withdrawItemsTo(address _itemsCollectionAddress, uint256[] calldata _itemIds, address _to) external onlyRole(OWNER_ROLE) {
+    IERC1155 items = IERC1155(_itemsCollectionAddress);
     uint256[] memory itemBalances = new uint256[](_itemIds.length);
 
     for (uint256 i = 0; i < _itemIds.length; i++) {
@@ -192,13 +192,13 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
    * @dev Private helpers
    */
 
-  function _setItemOffer(ItemOfferType _type, address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) private {
-    IERC1155_Game_Items items = IERC1155_Game_Items(_itemsAddress);
+  function _setItemOffer(ItemOfferType _type, address _itemsCollectionAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) private {
+    IERC1155_Game_Items_Collection itemsCollection = IERC1155_Game_Items_Collection(_itemsCollectionAddress);
     IERC20 currency = IERC20(_currencyAddress);
 
-    require(items.supportsInterface(type(IERC1155_Game_Items).interfaceId), "Invalid items contract");
+    require(itemsCollection.supportsInterface(type(IERC1155_Game_Items_Collection).interfaceId), "Invalid items contract");
 
-    bytes32 itemOfferId = generateItemOfferId(_itemsAddress, _currencyAddress, _itemIds);
+    bytes32 itemOfferId = generateItemOfferId(_itemsCollectionAddress, _currencyAddress, _itemIds);
     uint256 existingUses = _type == ItemOfferType.BUYABLE
       ? buyableItemOffers[itemOfferId].uses
       : sellableItemOffers[itemOfferId].uses;
@@ -210,7 +210,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
       currencyAmount: _currencyAmount,
       uses: existingUses,
       maxUses: _maxUses,
-      items: items,
+      itemsCollection: itemsCollection,
       currency: currency
     });
 
@@ -227,8 +227,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
 
   function _itemOfferExists(ItemOfferType _type, bytes32 _itemOfferId) private view returns (bool) {
     return _type == ItemOfferType.BUYABLE
-      ? address(buyableItemOffers[_itemOfferId].items) != address(0)
-      : address(sellableItemOffers[_itemOfferId].items) != address(0);
+      ? address(buyableItemOffers[_itemOfferId].itemsCollection) != address(0)
+      : address(sellableItemOffers[_itemOfferId].itemsCollection) != address(0);
   }
 
   function _itemOfferIsActive(ItemOfferType _type, bytes32 _itemOfferId) private view returns (bool) {

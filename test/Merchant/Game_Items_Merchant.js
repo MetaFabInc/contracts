@@ -18,7 +18,7 @@ describe('Game_Items_Merchant', () => {
 
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
     const ERC20_Game_Currency = await ethers.getContractFactory('ERC20_Game_Currency');
-    const ERC1155_Game_Items = await ethers.getContractFactory('ERC1155_Game_Items');
+    const ERC1155_Game_Items_Collection = await ethers.getContractFactory('ERC1155_Game_Items_Collection');
     const Game_Items_Merchant = await ethers.getContractFactory('Game_Items_Merchant');
 
     owner = _owner;
@@ -34,7 +34,7 @@ describe('Game_Items_Merchant', () => {
       forwarderAddress,
     );
 
-    itemsContract = await ERC1155_Game_Items.deploy(forwarderAddress);
+    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress);
 
     merchantContract = await Game_Items_Merchant.deploy(forwarderAddress);
   });
@@ -76,7 +76,7 @@ describe('Game_Items_Merchant', () => {
     expect(buyableItemOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
     expect(buyableItemOffer.uses * 0).to.equal(0);
     expect(buyableItemOffer.maxUses * 0).to.equal(0);
-    expect(buyableItemOffer.items).to.equal(itemsContract.address);
+    expect(buyableItemOffer.itemsCollection).to.equal(itemsContract.address);
     expect(buyableItemOffer.currency).to.equal(tokenContract.address);
 
     for(let i = 0; i < buyableItemOffer.itemIds; i++) {
@@ -110,7 +110,7 @@ describe('Game_Items_Merchant', () => {
     expect(sellableItemOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
     expect(sellableItemOffer.uses * 0).to.equal(0);
     expect(sellableItemOffer.maxUses * 0).to.equal(0);
-    expect(sellableItemOffer.items).to.equal(itemsContract.address);
+    expect(sellableItemOffer.itemsCollection).to.equal(itemsContract.address);
     expect(sellableItemOffer.currency).to.equal(tokenContract.address);
 
     for(let i = 0; i < sellableItemOffer.itemIds; i++) {
