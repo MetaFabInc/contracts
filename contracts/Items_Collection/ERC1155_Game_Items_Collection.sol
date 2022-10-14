@@ -83,8 +83,23 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
   }
 
   /**
-   * @dev Pagination
+   * @dev Data retrieval
    */
+
+  function balanceOfAll(address _address) external view returns(uint256[][] memory) {
+    uint256[][] memory balances = new uint256[][](itemIds.length);
+
+    for (uint256 i = 0; i < itemIds.length; i++) {
+      uint256[] memory itemBalance = new uint256[](2);
+
+      itemBalance[0] = itemIds[i];
+      itemBalance[1] = balanceOf(_address, itemIds[i]);
+
+      balances[i] = itemBalance;
+    }
+
+    return balances;
+  }
 
   function totalItemIds() external view returns(uint256) {
     return itemIds.length;

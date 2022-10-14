@@ -29,6 +29,7 @@ interface IERC1155_Game_Items_Collection is IERC1155  {
   function burnBatchFromAddress(address _fromAddress, uint256[] calldata _itemIds, uint256[] calldata _quantities) external;
   function bulkSafeTransferFrom(address _from, address[] calldata _toAddresses, uint256 _itemId, uint256 _quantityPerAddress) external;
   function bulkSafeBatchTransferFrom(address _from, address[] calldata _toAddresses, uint256[] calldata _itemIds, uint256[] calldata _quantitiesPerAddress) external;
+  function balanceOfAll(address _address) external view returns(uint256[][] memory);
   function totalItemIds() external view returns (uint256);
   function allItemIds() external view returns (uint256[] memory);
   function allItemSupplies() external view returns (uint256[] memory);

@@ -408,6 +408,17 @@ describe('ERC1155_Game_Items_Collection', () => {
    * Iteration Tests
    */
 
+  it('Should return all item balances for address', async () => {
+    for (let i = 0; i < 50; i++) {
+      await mintItemToAddress(owner.address, Math.floor((Math.random() * 10000)), 1);
+    }
+
+    const allBalances = await itemsContract.balanceOfAll(owner.address);
+
+    expect(allBalances.length).to.equal(50);
+    expect(allBalances[0].length).to.equal(2);
+  })
+
   it('Should get all item ids', async () => {
     for (let i = 0; i < 50; i++) {
       await mintItemToAddress(owner.address, Math.floor((Math.random() * 10000)), 1);
