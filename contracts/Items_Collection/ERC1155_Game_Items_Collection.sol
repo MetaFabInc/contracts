@@ -110,7 +110,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     string[] memory uris = new string[](itemIds.length);
 
     for (uint256 i = 0; i < itemIds.length; i++) {
-      uris[i] = itemURIs[itemIds[i]];
+      uris[i] = uri(itemIds[i]);
     }
 
     return uris;
@@ -166,7 +166,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     string[] memory uris = new string[](totalPaginate);
 
     for (uint256 i = 0; i < totalPaginate; i++) {
-      uris[i] = itemURIs[itemIds[_itemIdsStartIndexInclusive + i]];
+      uris[i] = uri(itemIds[_itemIdsStartIndexInclusive + i]);
     }
 
     return uris;
