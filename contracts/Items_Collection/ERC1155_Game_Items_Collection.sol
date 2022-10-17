@@ -34,7 +34,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
   }
 
   function uri(uint256 _itemId) public view override returns (string memory) {
-    require(itemExists[_itemId], "URI request for invalid itemId");
+    require(itemExists[_itemId], "URI request for non existent itemId");
 
     return bytes(itemBaseURI).length > 0
       ? string(abi.encodePacked(itemBaseURI, _itemId.toString()))
