@@ -17,6 +17,7 @@ import "../common/Roles.sol";
 
 contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC1155, ERC2771Context_Upgradeable, Roles, AccessControl {
   uint256[] public itemIds;
+  mapping(uint256 => bool) public itemExists; // itemId => bool, has been minted at least 1 time
   mapping(uint256 => uint256) public itemSupplies; // itemId => minted item supply
   mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp.
   mapping(uint256 => string) private itemURIs; // itemId => complete metadata uri
@@ -34,16 +35,6 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
 
   function setItemURI(uint256 _itemId, string memory _uri) external onlyRole(OWNER_ROLE) {
     itemURIs[_itemId] = _uri;
-  }
-
-  function bulkSetItemURIs(uint256[] calldata _itemIds, string[] memory _uris) external onlyRole(OWNER_ROLE) {
-    for (uint256 i = 0; i < _itemIds.length; i++) {
-      itemURIs[_itemIds[i]] = _uris[i];
-    }
-  }
-
-  function itemExists(uint256 _itemId) external view returns (bool) {
-    return itemSupplies[_itemId] > 0;
   }
 
   function isItemTransferrable(uint256 _itemId) public view returns (bool) {
@@ -70,12 +61,6 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     _burnBatch(_fromAddress, _itemIds, _quantities);
   }
 
-  function bulkSafeTransferFrom(address _fromAddress, address[] calldata _toAddresses, uint256 _itemId, uint256 _quantityPerAddress) external {
-    for (uint256 i = 0; i < _toAddresses.length; i++) {
-      safeTransferFrom(_fromAddress, _toAddresses[i], _itemId, _quantityPerAddress, "");
-    }
-  }
-
   function bulkSafeBatchTransferFrom(address _fromAddress, address[] calldata _toAddresses, uint256[] calldata _itemIds, uint256[] calldata _quantitiesPerAddress) external {
     for (uint256 i = 0; i < _toAddresses.length; i++) {
       safeBatchTransferFrom(_fromAddress, _toAddresses[i], _itemIds, _quantitiesPerAddress, "");
@@ -85,6 +70,39 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
   /**
    * @dev Data retrieval
    */
+
+  function totalItemIds() external view returns(uint256) {
+    return itemIds.length;
+  }
+
+  function allItemIds() external view returns (uint256[] memory) {
+    return itemIds;
+  }
+
+  function allItemSupplies() external view returns (uint256[][] memory) {
+    uint256[][] memory supplies = new uint256[][](itemIds.length);
+
+    for (uint256 i = 0; i < itemIds.length; i++) {
+      uint256[] memory itemSupply = new uint256[](2);
+
+      itemSupply[0] = itemIds[i];
+      itemSupply[1] = itemSupplies[itemSupply[0]];
+
+      supplies[i] = itemSupply;
+    }
+
+    return supplies;
+  }
+
+  function allItemURIs() external view returns (string[] memory) {
+    string[] memory uris = new string[](itemIds.length);
+
+    for (uint256 i = 0; i < itemIds.length; i++) {
+      uris[i] = itemURIs[itemIds[i]];
+    }
+
+    return uris;
+  }
 
   function balanceOfAll(address _address) external view returns(uint256[][] memory) {
     uint256[][] memory balances = new uint256[][](itemIds.length);
@@ -101,34 +119,6 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     return balances;
   }
 
-  function totalItemIds() external view returns(uint256) {
-    return itemIds.length;
-  }
-
-  function allItemIds() external view returns (uint256[] memory) {
-    return itemIds;
-  }
-
-  function allItemSupplies() external view returns (uint256[] memory) {
-    uint256[] memory supplies = new uint256[](itemIds.length);
-
-    for (uint256 i = 0; i < itemIds.length; i++) {
-      supplies[i] = itemSupplies[itemIds[i]];
-    }
-
-    return supplies;
-  }
-
-  function allItemURIs() external view returns (string[] memory) {
-    string[] memory uris = new string[](itemIds.length);
-
-    for (uint256 i = 0; i < itemIds.length; i++) {
-      uris[i] = itemURIs[itemIds[i]];
-    }
-
-    return uris;
-  }
-
   function paginateItemIds(uint256 _itemIdsStartIndexInclusive, uint256 _limit) external view returns (uint256[] memory) {
     uint256 totalPaginatable = _itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - _itemIdsStartIndexInclusive : 0;
     uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
@@ -141,13 +131,18 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     return ids;
   }
 
-  function paginateItemSupplies(uint256 _itemIdsStartIndexInclusive, uint256 _limit) external view returns (uint256[] memory) {
+  function paginateItemSupplies(uint256 _itemIdsStartIndexInclusive, uint256 _limit) external view returns (uint256[][] memory) {
     uint256 totalPaginatable = _itemIdsStartIndexInclusive < itemIds.length ? itemIds.length - _itemIdsStartIndexInclusive : 0;
     uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
-    uint256[] memory supplies = new uint256[](totalPaginate);
+    uint256[][] memory supplies = new uint256[][](totalPaginate);
 
     for (uint256 i = 0; i < totalPaginate; i++) {
-      supplies[i] = itemSupplies[itemIds[_itemIdsStartIndexInclusive + i]];
+      uint256[] memory supply = new uint256[](2);
+
+      supply[0] = itemIds[_itemIdsStartIndexInclusive + i];
+      supply[1] = itemSupplies[supply[0]];
+
+      supplies[i] = supply;
     }
 
     return supplies;
@@ -210,8 +205,9 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
       );
 
       if (from == address(0)) {
-        if (itemSupplies[id] == 0) { // new item
-          itemIds.push(id);
+        if (!itemExists[id]) {
+          itemIds.push(id); // set, so only adds if unique
+          itemExists[id] = true;
         }
 
         itemSupplies[id] += amounts[i];

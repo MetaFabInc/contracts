@@ -47,17 +47,6 @@ describe('ERC1155_Game_Items_Collection', () => {
     expect(await itemsContract.uri(0)).to.equal(uri);
   });
 
-  it('Should bulk set item uri and return item uris', async () => {
-    const itemIds = [ 0, 1 ];
-    const uris = [ 'ipfs://0.png', 'ipfs://1.png' ];
-
-    await itemsContract.bulkSetItemURIs(itemIds, uris);
-
-    for (let i = 0; i < itemIds.length; i++) {
-      expect(await itemsContract.uri(itemIds[i])).to.equal(uris[i]);
-    }
-  });
-
   /*
    * Mint Tests
    */
@@ -186,7 +175,7 @@ describe('ERC1155_Game_Items_Collection', () => {
    * Transfer Tests
    */
 
-  it('Should bulk safe transfer item to multiple addresses', async () => {
+  it('Should bulk safe batch transfer single item to multiple addresses', async () => {
     const recipientAddresses = [ otherAddresses[0].address, otherAddresses[1].address ];
     const itemId = 0;
     const quantity = 10;
@@ -194,7 +183,7 @@ describe('ERC1155_Game_Items_Collection', () => {
 
     await mintItemToAddress(owner.address, itemId, quantity);
 
-    await itemsContract.bulkSafeTransferFrom(owner.address, recipientAddresses, itemId, transferAmount);
+    await itemsContract.bulkSafeBatchTransferFrom(owner.address, recipientAddresses, [ itemId ], [ transferAmount ]);
 
     for (let i = 0; i < recipientAddresses.length; i++) {
       expect(await itemsContract.balanceOf(recipientAddresses[i], itemId)).to.equal(transferAmount);
@@ -218,7 +207,7 @@ describe('ERC1155_Game_Items_Collection', () => {
     }
   });
 
-  it('Fails to bulk safe transfer or bulk safe batch transfer when not item owner nor approved', async () => {
+  it('Fails to bulk safe batch transfer when not item owner nor approved', async () => {
     const recipientAddresses = [ otherAddresses[0].address, otherAddresses[1].address ];
     const itemIds = [ 0, 1 ];
     const quantities = [ 5, 5 ];
@@ -227,13 +216,6 @@ describe('ERC1155_Game_Items_Collection', () => {
     await itemsContract.mintBatchToAddress(owner.address, itemIds, quantities);
 
     await itemsContract.bulkSafeBatchTransferFrom(owner.address, recipientAddresses, itemIds, transferAmounts);
-
-    await expect(itemsContract.bulkSafeTransferFrom(
-      recipientAddresses[0],
-      [ owner.address, recipientAddresses[1] ],
-      itemIds[0],
-      transferAmounts[0],
-    )).to.be.reverted;
 
     await expect(itemsContract.bulkSafeBatchTransferFrom(
       recipientAddresses[0],
@@ -382,9 +364,6 @@ describe('ERC1155_Game_Items_Collection', () => {
      expect(await itemsContract.itemSupplies(itemId)).to.equal(quantity - 5);
      expect(await itemsContract.itemExists(itemId)).to.equal(true);
 
-     await itemsContract.burnFromAddress(owner.address, itemId, 10);
-     expect(await itemsContract.itemExists(itemId)).to.equal(false);
-
      await expect(itemsContract.burnFromAddress(
        owner.address,
        itemId,
@@ -454,10 +433,9 @@ describe('ERC1155_Game_Items_Collection', () => {
     for (let i = 0; i < totalItems; i++) {
       const itemId = i * 5;
       await mintItemToAddress(owner.address, itemId, 1);
+      await itemsContract.setItemURI(itemId, `ipfs://${itemId}`);
       itemIds.push(itemId);
     }
-
-    await itemsContract.bulkSetItemURIs(itemIds, itemIds.map(id => `ipfs://${id}`));
 
     const allItemIds = await itemsContract.allItemIds();
     for (let i = 0; i < itemIds.length; i++) {
@@ -466,7 +444,8 @@ describe('ERC1155_Game_Items_Collection', () => {
 
     const allItemSupplies = await itemsContract.allItemSupplies();
     for (let i = 0; i < itemIds.length; i++) {
-      expect(allItemSupplies[i]).to.equal(1);
+      expect(allItemSupplies[i][0] * 1).to.equal(itemIds[i] * 1);
+      expect(allItemSupplies[i][1] * 1).to.equal(1);
     }
 
     const allItemURIs = await itemsContract.allItemURIs();
@@ -481,7 +460,8 @@ describe('ERC1155_Game_Items_Collection', () => {
 
     const paginatedItemSupplies = await itemsContract.paginateItemSupplies(5, 10);
     for (let i = 5; i < 5 + 10; i++) {
-      expect(allItemSupplies[i]).to.equal(paginatedItemSupplies[i - 5]);
+      expect(allItemSupplies[i][0] * 1).to.equal(paginatedItemSupplies[i - 5][0] * 1);
+      expect(allItemSupplies[i][1] * 1).to.equal(paginatedItemSupplies[i - 5][1] * 1);
     }
 
     const paginatedItemURIs = await itemsContract.paginateItemURIs(5, 10);
@@ -496,6 +476,16 @@ describe('ERC1155_Game_Items_Collection', () => {
     expect((await itemsContract.paginateItemSupplies(40, 100)).length).to.equal(10);
     expect((await itemsContract.paginateItemURIs(100, 100)).length).to.equal(0);
     expect((await itemsContract.paginateItemURIs(40, 100)).length).to.equal(10);
+  });
+
+  it('Should retain one unique itemId in itemIds when supply goes to zero and is reincremented', async () => {
+    await mintItemToAddress(owner.address, 1, 1);
+    await itemsContract.burnFromAddress(owner.address, 1, 1);
+    await mintItemToAddress(owner.address, 1, 1);
+
+    const itemIds = await itemsContract.allItemIds();
+
+    expect(itemIds.length).to.equal(1);
   });
 
   /**
