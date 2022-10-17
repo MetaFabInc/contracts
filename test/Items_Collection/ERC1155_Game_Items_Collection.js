@@ -42,9 +42,23 @@ describe('ERC1155_Game_Items_Collection', () => {
   it('Should set item uri and return item uri', async () => {
     const uri = 'https://testing.com/0.png'
 
+    await mintItemToAddress(owner.address, 0, 1);
     await itemsContract.setItemURI(0, uri);
 
     expect(await itemsContract.uri(0)).to.equal(uri);
+  });
+
+  it('Should set itemBaseURI and return itemId uris with itemBaseURI prefixed', async () => {
+    const itemBaseURI = 'https://ipfs.trymetafab.com/ipfs/testing/';
+
+    await mintItemToAddress(owner.address, 0, 1);
+    await itemsContract.setItemBaseURI(itemBaseURI);
+
+    expect(await itemsContract.uri(0)).to.equal(`${itemBaseURI}0`);
+  });
+
+  it('Fails to retrieve item uri for itemId that does not exist', async () => {
+    await expect(itemsContract.uri(3)).to.be.reverted;
   });
 
   /*

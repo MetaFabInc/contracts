@@ -11,12 +11,16 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "./IERC1155_Game_Items_Collection.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
 
 contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC1155, ERC2771Context_Upgradeable, Roles, AccessControl {
+  using Strings for uint256;
+
   uint256[] public itemIds;
+  string public itemBaseURI;
   mapping(uint256 => bool) public itemExists; // itemId => bool, has been minted at least 1 time
   mapping(uint256 => uint256) public itemSupplies; // itemId => minted item supply
   mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp.
@@ -30,7 +34,15 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
   }
 
   function uri(uint256 _itemId) public view override returns (string memory) {
-    return itemURIs[_itemId];
+    require(itemExists[_itemId], "URI request for invalid itemId");
+
+    return bytes(itemBaseURI).length > 0
+      ? string(abi.encodePacked(itemBaseURI, _itemId.toString()))
+      : itemURIs[_itemId];
+  }
+
+  function setItemBaseURI(string memory _itemBaseURI) external {
+    itemBaseURI = _itemBaseURI;
   }
 
   function setItemURI(uint256 _itemId, string memory _uri) external onlyRole(OWNER_ROLE) {
