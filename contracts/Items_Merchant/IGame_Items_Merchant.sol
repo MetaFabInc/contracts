@@ -25,6 +25,14 @@ interface IGame_Items_Merchant  {
     IERC20 currency;
   }
 
+  // events
+  event Buy(bytes32 indexed offerId, ItemOffer offer, address buyer);
+  event BuyOfferSet(bytes32 indexed offerId, ItemOffer offer);
+  event BuyOfferRemoved(bytes32 indexed offerId, ItemOffer offer);
+  event Sell(bytes32 indexed offerId, ItemOffer offer, address seller);
+  event SellOfferSet(bytes32 indexed offerId, ItemOffer offer);
+  event SellOfferRemoved(bytes32 indexed offerId, ItemOffer offer);
+
   // function
   function allBuyableItemOfferIds() external view returns (bytes32[] memory);
   function getBuyableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory);

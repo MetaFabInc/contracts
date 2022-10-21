@@ -66,6 +66,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
 
   function removeBuyableItemOffer(bytes32 _itemOfferId) external onlyRole(OWNER_ROLE) {
     buyableItemOffers[_itemOfferId].isActive = false;
+    emit BuyOfferRemoved(_itemOfferId, buyableItemOffers[_itemOfferId]);
   }
 
   /*
@@ -102,6 +103,7 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
 
   function removeSellableItemOffer(bytes32 _itemOfferId) external onlyRole(OWNER_ROLE)  {
     sellableItemOffers[_itemOfferId].isActive = false;
+    emit SellOfferRemoved(_itemOfferId, sellableItemOffers[_itemOfferId]);
   }
 
   /*
@@ -134,6 +136,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     }
 
     itemOffer.uses++;
+
+    emit Buy(_itemOfferId, itemOffer, _msgSender());
   }
 
   function sell(bytes32 _itemOfferId) external canUseItemOffer(ItemOfferType.SELLABLE, _itemOfferId) nonReentrant {
@@ -155,6 +159,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     }
 
     itemOffer.uses++;
+
+    emit Sell(_itemOfferId, itemOffer, _msgSender());
   }
 
   /*
@@ -220,9 +226,13 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
         : sellableItemOfferIds.push(itemOfferId);
     }
 
-    _type == ItemOfferType.BUYABLE
-      ? buyableItemOffers[itemOfferId] = itemOffer
-      : sellableItemOffers[itemOfferId] = itemOffer;
+    if (_type == ItemOfferType.BUYABLE) {
+      buyableItemOffers[itemOfferId] = itemOffer;
+      emit BuyOfferSet(itemOfferId, itemOffer);
+    } else {
+      sellableItemOffers[itemOfferId] = itemOffer;
+      emit SellOfferSet(itemOfferId, itemOffer);
+    }
   }
 
   function _itemOfferExists(ItemOfferType _type, bytes32 _itemOfferId) private view returns (bool) {
