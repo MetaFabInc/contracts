@@ -10,38 +10,52 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../Items/IERC1155_Game_Items.sol";
+import "../Items_Collection/IERC1155_Game_Items_Collection.sol";
 
 interface IGame_Items_Merchant  {
+  // enums
+  enum ItemOfferType { UNSET, BUYABLE, SELLABLE }
+
   // structs
   struct ItemOffer {
-    bool isActive;
+    uint256 id;
     uint256[] itemIds;
     uint256[] itemAmounts;
     uint256 currencyAmount;
     uint256 uses;
     uint256 maxUses;
-    IERC1155_Game_Items items;
+    uint256 lastUpdatedAt;
+    ItemOfferType offerType;
+    IERC1155_Game_Items_Collection itemsCollection;
     IERC20 currency;
   }
 
+  // events
+  event Buy(uint256 indexed offerId, ItemOffer offer, address buyer);
+  event BuyOfferSet(uint256 indexed offerId, ItemOffer offer);
+  event BuyOfferRemoved(uint256 indexed offerId, ItemOffer offer);
+  event Sell(uint256 indexed offerId, ItemOffer offer, address seller);
+  event SellOfferSet(uint256 indexed offerId, ItemOffer offer);
+  event SellOfferRemoved(uint256 indexed offerId, ItemOffer offer);
+
   // function
-  function allBuyableItemOfferIds() external view returns (bytes32[] memory);
-  function getBuyableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory);
-  function paginateBuyableItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns (ItemOffer[] memory);
-  function totalBuyableItemOffers() external view returns (uint256);
-  function setBuyableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external;
-  function removeBuyableItemOffer(bytes32 _itemOfferId) external;
-  function allSellableItemOfferIds() external view returns (bytes32[] memory);
-  function getSellableItemOffer(bytes32 _itemOfferId) external view returns (ItemOffer memory);
-  function paginateSellableItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns (ItemOffer[] memory);
-  function totalSellableItemOffers() external view returns (uint256);
-  function setSellableItemOffer(address _itemsAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external;
-  function removeSellableItemOffer(bytes32 _itemOfferId) external;
-  function generateItemOfferId(address _itemsAddress, address _currencyAddress, uint256[] calldata _itemIds) external pure returns(bytes32);
-  function buy(bytes32 _itemOfferId) external payable;
-  function sell(bytes32 _itemOfferId) external;
-  function withdraw() external;
-  function withdrawCurrency(address _currencyAddress) external;
-  function withdrawItems(address _itemsAddress, uint256[] calldata _itemIds) external;
+  function allItemOfferIds() external view returns (uint256[] memory);
+
+  function allItemOffers() external view returns (ItemOffer[] memory);
+  function allItemOfferLastUpdates() external view returns (uint256[][] memory);
+  function paginateItemOfferIds(uint256 _startIndexInclusive, uint256 _limit) external view returns(uint256[] memory);
+  function paginateItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns(ItemOffer[] memory);
+  function paginateItemOfferLastUpdates(uint256 _startIndexInclusive, uint256 _limit) external view returns(uint256[][] memory);
+  function itemOfferId(uint256 _index) external view returns (uint256);
+  function itemOffer(uint256 _itemOfferId) external view returns (ItemOffer memory);
+  function itemOfferLastUpdate(uint256 _itemOfferId) external view returns (uint256[] memory);
+  function totalItemOffers() external view returns (uint256);
+
+  function setItemOffer(uint256 _itemOfferId, ItemOfferType _type, address _itemsCollectionAddress, uint256[] calldata _itemIds, uint256[] calldata _itemAmounts, address _currencyAddress, uint256 _currencyAmount, uint256 _maxUses) external;
+  function removeItemOffer(uint256 _itemOfferId) external;
+  function useItemOffer(uint256 _itemOfferId) external payable;
+
+  function withdrawTo(address _to) external;
+  function withdrawCurrencyTo(address _currencyAddress, address _to) external;
+  function withdrawItemsTo(address _itemsCollectionAddress, uint256[] calldata _itemIds, address _to) external;
 }
