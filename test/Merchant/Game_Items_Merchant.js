@@ -18,7 +18,7 @@ describe('Game_Items_Merchant', () => {
 
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
     const ERC20_Game_Currency = await ethers.getContractFactory('ERC20_Game_Currency');
-    const ERC1155_Game_Items = await ethers.getContractFactory('ERC1155_Game_Items');
+    const ERC1155_Game_Items_Collection = await ethers.getContractFactory('ERC1155_Game_Items_Collection');
     const Game_Items_Merchant = await ethers.getContractFactory('Game_Items_Merchant');
 
     owner = _owner;
@@ -34,7 +34,7 @@ describe('Game_Items_Merchant', () => {
       forwarderAddress,
     );
 
-    itemsContract = await ERC1155_Game_Items.deploy(forwarderAddress);
+    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress);
 
     merchantContract = await Game_Items_Merchant.deploy(forwarderAddress);
   });
@@ -76,7 +76,7 @@ describe('Game_Items_Merchant', () => {
     expect(buyableItemOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
     expect(buyableItemOffer.uses * 0).to.equal(0);
     expect(buyableItemOffer.maxUses * 0).to.equal(0);
-    expect(buyableItemOffer.items).to.equal(itemsContract.address);
+    expect(buyableItemOffer.itemsCollection).to.equal(itemsContract.address);
     expect(buyableItemOffer.currency).to.equal(tokenContract.address);
 
     for(let i = 0; i < buyableItemOffer.itemIds; i++) {
@@ -110,7 +110,7 @@ describe('Game_Items_Merchant', () => {
     expect(sellableItemOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
     expect(sellableItemOffer.uses * 0).to.equal(0);
     expect(sellableItemOffer.maxUses * 0).to.equal(0);
-    expect(sellableItemOffer.items).to.equal(itemsContract.address);
+    expect(sellableItemOffer.itemsCollection).to.equal(itemsContract.address);
     expect(sellableItemOffer.currency).to.equal(tokenContract.address);
 
     for(let i = 0; i < sellableItemOffer.itemIds; i++) {
@@ -468,7 +468,7 @@ describe('Game_Items_Merchant', () => {
 
     expect(await owner.provider.getBalance(merchantContract.address) * 1).to.equal(depositAmount * 1);
 
-    await merchantContract.withdraw();
+    await merchantContract.withdrawTo(owner.address);
 
     expect(await owner.provider.getBalance(merchantContract.address) * 1).to.equal(0);
     expect(await owner.getBalance() * 1).to.be.above(ownerStartBalance * 1);
@@ -479,7 +479,7 @@ describe('Game_Items_Merchant', () => {
 
     await tokenContract.mint(merchantContract.address, depositAmount);
     expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(depositAmount * 1);
-    await merchantContract.withdrawCurrency(tokenContract.address);
+    await merchantContract.withdrawCurrencyTo(tokenContract.address, owner.address);
     expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(0);
     expect(await tokenContract.balanceOf(owner.address) * 1).to.equal(depositAmount * 1);
   });
@@ -490,7 +490,7 @@ describe('Game_Items_Merchant', () => {
     await itemsContract.mintBatchToAddress(merchantContract.address, itemIds, [ 1, 1 ]);
     expect(await itemsContract.balanceOf(merchantContract.address, itemIds[0])).to.equal(1);
     expect(await itemsContract.balanceOf(merchantContract.address, itemIds[1])).to.equal(1);
-    await merchantContract.withdrawItems(itemsContract.address, itemIds);
+    await merchantContract.withdrawItemsTo(itemsContract.address, itemIds, owner.address);
     expect(await itemsContract.balanceOf(merchantContract.address, itemIds[0])).to.equal(0);
     expect(await itemsContract.balanceOf(merchantContract.address, itemIds[1])).to.equal(0);
     expect(await itemsContract.balanceOf(owner.address, itemIds[0])).to.equal(1);
@@ -507,9 +507,9 @@ describe('Game_Items_Merchant', () => {
 
     await itemsContract.mintBatchToAddress(merchantContract.address, [ 3 ], [ 1 ]);
 
-    await expect(merchantContract.connect(otherAddresses[0]).withdraw()).to.be.reverted;
-    await expect(merchantContract.connect(otherAddresses[0]).withdrawCurrency(tokenContract.address)).to.be.reverted;
-    await expect(merchantContract.connect(otherAddresses[0]).withdrawItems(itemsContract.address, [ 3 ])).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).withdrawTo(owner.address)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).withdrawCurrencyTo(tokenContract.address, owner.address)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).withdrawItemsTo(itemsContract.address, [ 3 ], owner.address)).to.be.reverted;
   });
 
   /*

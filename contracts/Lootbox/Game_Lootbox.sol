@@ -10,7 +10,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "../Items/IERC1155_Game_Items.sol";
+import "../Items_Collection/IERC1155_Game_Items_Collection.sol";
 import "../Currency/IERC20_Game_Currency.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 
