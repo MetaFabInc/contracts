@@ -136,7 +136,8 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     uint256 _currencyAmount,
     uint256 _maxUses
   ) external onlyRole(OWNER_ROLE) {
-    require (_type == OfferType.BUYABLE || _type == OfferType.SELLABLE, "Invalid offer type");
+    require(_type == OfferType.BUYABLE || _type == OfferType.SELLABLE, "Invalid offer type");
+    require(_itemIds.length == _itemAmounts.length, "itemIds and itemAmounts size mismatch");
     require(IERC1155_Game_Items_Collection(_itemsCollectionAddress).supportsInterface(type(IERC1155_Game_Items_Collection).interfaceId), "Invalid items contract");
 
     Offer memory offerSet = Offer({
