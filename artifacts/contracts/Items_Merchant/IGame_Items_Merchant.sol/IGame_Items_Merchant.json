@@ -8,16 +8,16 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "bytes32",
+          "internalType": "uint256",
           "name": "offerId",
-          "type": "bytes32"
+          "type": "uint256"
         },
         {
           "components": [
             {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
             },
             {
               "internalType": "uint256[]",
@@ -45,6 +45,16 @@
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
               "internalType": "contract IERC1155_Game_Items_Collection",
               "name": "itemsCollection",
               "type": "address"
@@ -56,7 +66,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
+          "internalType": "struct IGame_Items_Merchant.Offer",
           "name": "offer",
           "type": "tuple"
         },
@@ -75,16 +85,16 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "bytes32",
+          "internalType": "uint256",
           "name": "offerId",
-          "type": "bytes32"
+          "type": "uint256"
         },
         {
           "components": [
             {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
             },
             {
               "internalType": "uint256[]",
@@ -112,6 +122,16 @@
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
               "internalType": "contract IERC1155_Game_Items_Collection",
               "name": "itemsCollection",
               "type": "address"
@@ -123,7 +143,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
+          "internalType": "struct IGame_Items_Merchant.Offer",
           "name": "offer",
           "type": "tuple"
         }
@@ -136,16 +156,16 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "bytes32",
+          "internalType": "uint256",
           "name": "offerId",
-          "type": "bytes32"
+          "type": "uint256"
         },
         {
           "components": [
             {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
             },
             {
               "internalType": "uint256[]",
@@ -173,6 +193,16 @@
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
               "internalType": "contract IERC1155_Game_Items_Collection",
               "name": "itemsCollection",
               "type": "address"
@@ -184,7 +214,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
+          "internalType": "struct IGame_Items_Merchant.Offer",
           "name": "offer",
           "type": "tuple"
         }
@@ -197,16 +227,16 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "bytes32",
+          "internalType": "uint256",
           "name": "offerId",
-          "type": "bytes32"
+          "type": "uint256"
         },
         {
           "components": [
             {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
             },
             {
               "internalType": "uint256[]",
@@ -234,6 +264,16 @@
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
               "internalType": "contract IERC1155_Game_Items_Collection",
               "name": "itemsCollection",
               "type": "address"
@@ -245,7 +285,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
+          "internalType": "struct IGame_Items_Merchant.Offer",
           "name": "offer",
           "type": "tuple"
         },
@@ -264,16 +304,16 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "bytes32",
+          "internalType": "uint256",
           "name": "offerId",
-          "type": "bytes32"
+          "type": "uint256"
         },
         {
           "components": [
             {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
             },
             {
               "internalType": "uint256[]",
@@ -301,6 +341,16 @@
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
               "internalType": "contract IERC1155_Game_Items_Collection",
               "name": "itemsCollection",
               "type": "address"
@@ -312,7 +362,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
+          "internalType": "struct IGame_Items_Merchant.Offer",
           "name": "offer",
           "type": "tuple"
         }
@@ -325,16 +375,16 @@
       "inputs": [
         {
           "indexed": true,
-          "internalType": "bytes32",
+          "internalType": "uint256",
           "name": "offerId",
-          "type": "bytes32"
+          "type": "uint256"
         },
         {
           "components": [
             {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
             },
             {
               "internalType": "uint256[]",
@@ -360,6 +410,16 @@
               "internalType": "uint256",
               "name": "maxUses",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
             },
             {
               "internalType": "contract IERC1155_Game_Items_Collection",
@@ -373,7 +433,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
+          "internalType": "struct IGame_Items_Merchant.Offer",
           "name": "offer",
           "type": "tuple"
         }
@@ -383,12 +443,12 @@
     },
     {
       "inputs": [],
-      "name": "allBuyableItemOfferIds",
+      "name": "allOfferIds",
       "outputs": [
         {
-          "internalType": "bytes32[]",
+          "internalType": "uint256[]",
           "name": "",
-          "type": "bytes32[]"
+          "type": "uint256[]"
         }
       ],
       "stateMutability": "view",
@@ -396,12 +456,77 @@
     },
     {
       "inputs": [],
-      "name": "allSellableItemOfferIds",
+      "name": "allOfferLastUpdates",
       "outputs": [
         {
-          "internalType": "bytes32[]",
+          "internalType": "uint256[][]",
           "name": "",
-          "type": "bytes32[]"
+          "type": "uint256[][]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "allOffers",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "itemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "itemAmounts",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "currencyAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "uses",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxUses",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "contract IERC1155_Game_Items_Collection",
+              "name": "itemsCollection",
+              "type": "address"
+            },
+            {
+              "internalType": "contract IERC20",
+              "name": "currency",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IGame_Items_Merchant.Offer[]",
+          "name": "",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -410,438 +535,321 @@
     {
       "inputs": [
         {
-          "internalType": "bytes32",
-          "name": "_itemOfferId",
-          "type": "bytes32"
+          "internalType": "uint256",
+          "name": "_offerId",
+          "type": "uint256"
         }
       ],
-      "name": "buy",
+      "name": "offer",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "itemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "itemAmounts",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "currencyAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "uses",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxUses",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "contract IERC1155_Game_Items_Collection",
+              "name": "itemsCollection",
+              "type": "address"
+            },
+            {
+              "internalType": "contract IERC20",
+              "name": "currency",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IGame_Items_Merchant.Offer",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_index",
+          "type": "uint256"
+        }
+      ],
+      "name": "offerId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_offerId",
+          "type": "uint256"
+        }
+      ],
+      "name": "offerLastUpdate",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_startIndexInclusive",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "paginateOfferIds",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_startIndexInclusive",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "paginateOfferLastUpdates",
+      "outputs": [
+        {
+          "internalType": "uint256[][]",
+          "name": "",
+          "type": "uint256[][]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_startIndexInclusive",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "paginateOffers",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "itemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "itemAmounts",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "currencyAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "uses",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxUses",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "lastUpdatedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum IGame_Items_Merchant.OfferType",
+              "name": "offerType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "contract IERC1155_Game_Items_Collection",
+              "name": "itemsCollection",
+              "type": "address"
+            },
+            {
+              "internalType": "contract IERC20",
+              "name": "currency",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IGame_Items_Merchant.Offer[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_offerId",
+          "type": "uint256"
+        }
+      ],
+      "name": "removeOffer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_offerId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum IGame_Items_Merchant.OfferType",
+          "name": "_type",
+          "type": "uint8"
+        },
+        {
+          "internalType": "address",
+          "name": "_itemsCollectionAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_itemIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_itemAmounts",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "address",
+          "name": "_currencyAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_currencyAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maxUses",
+          "type": "uint256"
+        }
+      ],
+      "name": "setOffer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalOffers",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_offerId",
+          "type": "uint256"
+        }
+      ],
+      "name": "useOffer",
       "outputs": [],
       "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_itemsCollectionAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_currencyAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_itemIds",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "generateItemOfferId",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "pure",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_itemOfferId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "getBuyableItemOffer",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemAmounts",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "currencyAmount",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "uses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "maxUses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "contract IERC1155_Game_Items_Collection",
-              "name": "itemsCollection",
-              "type": "address"
-            },
-            {
-              "internalType": "contract IERC20",
-              "name": "currency",
-              "type": "address"
-            }
-          ],
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_itemOfferId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "getSellableItemOffer",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemAmounts",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "currencyAmount",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "uses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "maxUses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "contract IERC1155_Game_Items_Collection",
-              "name": "itemsCollection",
-              "type": "address"
-            },
-            {
-              "internalType": "contract IERC20",
-              "name": "currency",
-              "type": "address"
-            }
-          ],
-          "internalType": "struct IGame_Items_Merchant.ItemOffer",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_startIndexInclusive",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_limit",
-          "type": "uint256"
-        }
-      ],
-      "name": "paginateBuyableItemOffers",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemAmounts",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "currencyAmount",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "uses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "maxUses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "contract IERC1155_Game_Items_Collection",
-              "name": "itemsCollection",
-              "type": "address"
-            },
-            {
-              "internalType": "contract IERC20",
-              "name": "currency",
-              "type": "address"
-            }
-          ],
-          "internalType": "struct IGame_Items_Merchant.ItemOffer[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_startIndexInclusive",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_limit",
-          "type": "uint256"
-        }
-      ],
-      "name": "paginateSellableItemOffers",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "bool",
-              "name": "isActive",
-              "type": "bool"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "itemAmounts",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "currencyAmount",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "uses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "maxUses",
-              "type": "uint256"
-            },
-            {
-              "internalType": "contract IERC1155_Game_Items_Collection",
-              "name": "itemsCollection",
-              "type": "address"
-            },
-            {
-              "internalType": "contract IERC20",
-              "name": "currency",
-              "type": "address"
-            }
-          ],
-          "internalType": "struct IGame_Items_Merchant.ItemOffer[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_itemOfferId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "removeBuyableItemOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_itemOfferId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "removeSellableItemOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_itemOfferId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "sell",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_itemsCollectionAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_itemIds",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_itemAmounts",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "address",
-          "name": "_currencyAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_currencyAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_maxUses",
-          "type": "uint256"
-        }
-      ],
-      "name": "setBuyableItemOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_itemsCollectionAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_itemIds",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_itemAmounts",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "address",
-          "name": "_currencyAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_currencyAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_maxUses",
-          "type": "uint256"
-        }
-      ],
-      "name": "setSellableItemOffer",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "totalBuyableItemOffers",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "totalSellableItemOffers",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
       "type": "function"
     },
     {

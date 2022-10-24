@@ -4,6 +4,9 @@ const { BigNumber } = ethers;
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 
+const ENUM_BUYABLE_OFFER = 1;
+const ENUM_SELLABLE_OFFER = 2
+
 describe('Game_Items_Merchant', () => {
   let forwarderAddress;
   let forwarderContract;
@@ -58,9 +61,11 @@ describe('Game_Items_Merchant', () => {
     const itemIds = [ 53, 45 ];
     const itemAmounts = [ 1, 64 ];
     const currencyAmount = getTokenDecimalAmount(100);
+    const buyableOfferId = 123;
 
-    await setItemOffer(
-      'buyable',
+    await setOffer(
+      ENUM_BUYABLE_OFFER,
+      buyableOfferId,
       itemsContract.address,
       itemIds,
       itemAmounts,
@@ -69,22 +74,23 @@ describe('Game_Items_Merchant', () => {
       0
     );
 
-    const buyableItemOfferId = await merchantContract.buyableItemOfferIds(0);
-    const buyableItemOffer = await merchantContract.getBuyableItemOffer(buyableItemOfferId);
+    const buyableOffer = await merchantContract.offer(buyableOfferId);
 
-    expect(buyableItemOffer.isActive).to.equal(true);
-    expect(buyableItemOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
-    expect(buyableItemOffer.uses * 0).to.equal(0);
-    expect(buyableItemOffer.maxUses * 0).to.equal(0);
-    expect(buyableItemOffer.itemsCollection).to.equal(itemsContract.address);
-    expect(buyableItemOffer.currency).to.equal(tokenContract.address);
+    expect(buyableOffer.id * 1).to.equal(buyableOfferId);
+    expect(buyableOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
+    expect(buyableOffer.uses * 1).to.equal(0);
+    expect(buyableOffer.maxUses * 1).to.equal(0);
+    expect(buyableOffer.lastUpdatedAt * 1).to.not.equal(0);
+    expect(buyableOffer.offerType).to.equal(ENUM_BUYABLE_OFFER);
+    expect(buyableOffer.itemsCollection).to.equal(itemsContract.address);
+    expect(buyableOffer.currency).to.equal(tokenContract.address);
 
-    for(let i = 0; i < buyableItemOffer.itemIds; i++) {
-      expect(buyableItemOffer.itemIds[i] * 1).to.equal(itemIds[i]);
+    for(let i = 0; i < buyableOffer.itemIds; i++) {
+      expect(buyableOffer.itemIds[i] * 1).to.equal(itemIds[i]);
     }
 
-    for(let i = 0; i < buyableItemOffer.itemAmounts; i++) {
-      expect(buyableItemOffer.itemAmounts[i] * 1).to.equal(itemAmounts[i]);
+    for(let i = 0; i < buyableOffer.itemAmounts; i++) {
+      expect(buyableOffer.itemAmounts[i] * 1).to.equal(itemAmounts[i]);
     }
   });
 
@@ -93,8 +99,11 @@ describe('Game_Items_Merchant', () => {
     const itemAmounts = [ 1, 1 ];
     const currencyAmount = getTokenDecimalAmount(150);
 
-    await setItemOffer(
-      'sellable',
+    const sellableOfferId = 421;
+
+    await setOffer(
+      ENUM_SELLABLE_OFFER,
+      sellableOfferId,
       itemsContract.address,
       itemIds,
       itemAmounts,
@@ -103,185 +112,169 @@ describe('Game_Items_Merchant', () => {
       0
     );
 
-    const sellableItemOfferId = await merchantContract.sellableItemOfferIds(0);
-    const sellableItemOffer = await merchantContract.getSellableItemOffer(sellableItemOfferId);
+    const sellableOffer = await merchantContract.offer(sellableOfferId);
 
-    expect(sellableItemOffer.isActive).to.equal(true);
-    expect(sellableItemOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
-    expect(sellableItemOffer.uses * 0).to.equal(0);
-    expect(sellableItemOffer.maxUses * 0).to.equal(0);
-    expect(sellableItemOffer.itemsCollection).to.equal(itemsContract.address);
-    expect(sellableItemOffer.currency).to.equal(tokenContract.address);
+    expect(sellableOffer.id * 1).to.equal(sellableOfferId);
+    expect(sellableOffer.currencyAmount * 1).to.equal(currencyAmount * 1);
+    expect(sellableOffer.uses * 1).to.equal(0);
+    expect(sellableOffer.maxUses * 1).to.equal(0);
+    expect(sellableOffer.lastUpdatedAt * 1).to.not.equal(0);
+    expect(sellableOffer.offerType).to.equal(ENUM_SELLABLE_OFFER);
+    expect(sellableOffer.itemsCollection).to.equal(itemsContract.address);
+    expect(sellableOffer.currency).to.equal(tokenContract.address);
 
-    for(let i = 0; i < sellableItemOffer.itemIds; i++) {
-      expect(sellableItemOffer.itemIds[i] * 1).to.equal(itemIds[i]);
+    for(let i = 0; i < sellableOffer.itemIds; i++) {
+      expect(sellableOffer.itemIds[i] * 1).to.equal(itemIds[i]);
     }
 
-    for(let i = 0; i < sellableItemOffer.itemAmounts; i++) {
-      expect(sellableItemOffer.itemAmounts[i] * 1).to.equal(itemAmounts[i]);
+    for(let i = 0; i < sellableOffer.itemAmounts; i++) {
+      expect(sellableOffer.itemAmounts[i] * 1).to.equal(itemAmounts[i]);
     }
   });
 
-  it('Should paginate buyable offers', async () => {
+  it('Should paginate offers, offerIds, offerLastUpdates', async () => {
     const totalOffers = 10;
 
     for(let i = 0; i < totalOffers; i++) {
-      await setGenericItemOffer('buyable', getTokenDecimalAmount(10), 0);
+      const type = i > 4 ? ENUM_SELLABLE_OFFER : ENUM_BUYABLE_OFFER;
+      await setGenericOffer(type, i, getTokenDecimalAmount(10), 0);
     }
 
     await new Promise(resolve => setTimeout(resolve, 500)); // wait
-    const offers = await merchantContract.paginateBuyableItemOffers(0, 15); // pagination should not overflow, 15 used to test
+    const offers = await merchantContract.paginateOffers(0, 15); // pagination should not overflow, 15 used to test
 
+    // offers
     expect(offers.length).to.equal(totalOffers);
 
     for (let i = 0; i < totalOffers; i++) {
-      expect(offers[i].isActive).to.equal(true);
-    }
-  });
-
-  it('Should paginate sellable offers', async () => {
-    const totalOffers = 7;
-
-    for(let i = 0; i < totalOffers; i++) {
-      await setGenericItemOffer('sellable', getTokenDecimalAmount(10), 0);
+      expect(offers[i].id * 1).to.equal(i);
     }
 
-    const offers = await merchantContract.paginateSellableItemOffers(0, 15); // pagination should not overflow, 15 used to test
+    // offer ids
+    const offerIds = await merchantContract.paginateOfferIds(0, 15);
 
-    expect(offers.length).to.equal(totalOffers);
+    expect(offerIds.length).to.equal(totalOffers);
 
     for (let i = 0; i < totalOffers; i++) {
-      expect(offers[i].isActive).to.equal(true);
+      expect(offerIds[i] * 1).to.equal(i);
+    }
+
+    // offer last updates
+    const offerLastUpdates = await merchantContract.paginateOfferLastUpdates(0, 15);
+
+    expect(offerIds.length).to.equal(totalOffers);
+
+    for (let i = 0; i < totalOffers; i++) {
+      expect(offerLastUpdates[i].length).to.equal(2);
     }
   });
 
-  it ('Should remove buyable offers', async () => {
-    await setGenericItemOffer('buyable', getTokenDecimalAmount(10), 0);
+  it ('Should remove offers', async () => {
+    const offerId = 585;
 
-    const itemOfferId = await merchantContract.buyableItemOfferIds(0);
+    await setGenericOffer(ENUM_BUYABLE_OFFER, offerId, getTokenDecimalAmount(10), 0);
 
-    expect((await merchantContract.getBuyableItemOffer(itemOfferId)).isActive).to.equal(true);
+    expect((await merchantContract.offer(offerId)).id * 1).to.equal(offerId);
 
-    await merchantContract.removeBuyableItemOffer(itemOfferId);
+    await merchantContract.removeOffer(offerId);
 
-    expect((await merchantContract.getBuyableItemOffer(itemOfferId)).isActive).to.equal(false);
+    expect(await merchantContract.totalOffers() * 1).to.equal(0)
 
-    expect((await merchantContract.allBuyableItemOfferIds()).length).to.equal(1);
-  })
-
-  it('Should remove sellable offers', async () => {
-    await setGenericItemOffer('sellable', getTokenDecimalAmount(10), 0);
-
-    const itemOfferId = await merchantContract.sellableItemOfferIds(0);
-
-    expect((await merchantContract.getSellableItemOffer(itemOfferId)).isActive).to.equal(true);
-
-    await merchantContract.removeSellableItemOffer(itemOfferId);
-
-    expect((await merchantContract.getSellableItemOffer(itemOfferId)).isActive).to.equal(false);
-
-    expect((await merchantContract.allSellableItemOfferIds()).length).to.equal(1);
-  });
-
-  it('Should generate item offer ids ', async () => {
-    const itemOfferId = await merchantContract.generateItemOfferId(
-      itemsContract.address,
-      tokenContract.address,
-      [ 1 ],
-    );
-
-    expect(itemOfferId.length).to.not.equal(0);
+    await expect(merchantContract.offer(offerId)).to.be.reverted;
   });
 
   it('Should process buy offer that mints items and increment uses', async () => {
     const itemPrice = getTokenDecimalAmount(10);
 
-    await setGenericItemOffer('buyable', itemPrice, 0, true);
+    const offerId = 55563;
+
+    await setGenericOffer(ENUM_BUYABLE_OFFER, offerId, itemPrice, 0, true);
 
     const buyer = otherAddresses[0];
-    const offerId = await merchantContract.buyableItemOfferIds(0);
-    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
 
     await tokenContract.mint(buyer.address, itemPrice);
     await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
-    await merchantContract.connect(buyer).buy(offerId);
+    await merchantContract.connect(buyer).useOffer(offerId);
 
     expect(await tokenContract.balanceOf(buyer.address) * 1).to.equal(0);
     expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(itemPrice * 1);
-    expect((await merchantContract.getBuyableItemOffer(offerId)).uses).to.equal(1);
+    expect((await merchantContract.offer(offerId)).uses).to.equal(1);
     expect(await itemsContract.balanceOf(buyer.address, offer.itemIds[0]) * 1).to.equal(1);
   });
 
   it('Should process buy offer that transfers items', async () => {
     const itemPrice = getTokenDecimalAmount(10);
+    const offerId = 76799;
 
-    await setGenericItemOffer('buyable', itemPrice, 0, false);
+    await setGenericOffer(ENUM_BUYABLE_OFFER, offerId, itemPrice, 0, false);
 
     const buyer = otherAddresses[0];
-    const offerId = await merchantContract.buyableItemOfferIds(0);
-    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await tokenContract.mint(buyer.address, itemPrice);
     await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
     await itemsContract.mintToAddress(merchantContract.address, itemId, 1);
-    await merchantContract.connect(buyer).buy(offerId);
+    await merchantContract.connect(buyer).useOffer(offerId);
 
     expect(await tokenContract.balanceOf(buyer.address) * 1).to.equal(0);
     expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(itemPrice * 1);
     expect(await itemsContract.balanceOf(buyer.address, itemId) * 1).to.equal(1);
     expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(0);
-    expect((await merchantContract.getBuyableItemOffer(offerId)).uses).to.equal(1);
+    expect((await merchantContract.offer(offerId)).uses).to.equal(1);
   });
 
   it('Should process sell offer that mints currency and increment uses', async () => {
     const sellPrice = getTokenDecimalAmount(15);
+    const offerId = 995532;
 
-    await setGenericItemOffer('sellable', sellPrice, 0, true);
+    await setGenericOffer(ENUM_SELLABLE_OFFER, offerId, sellPrice, 0, true);
 
     const seller = otherAddresses[0];
-    const offerId = await merchantContract.sellableItemOfferIds(0);
-    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await itemsContract.mintToAddress(seller.address, itemId, 1);
     await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
-    await merchantContract.connect(seller).sell(offerId);
+    await merchantContract.connect(seller).useOffer(offerId);
 
     expect(await itemsContract.balanceOf(seller.address, itemId) * 1).to.equal(0);
     expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(1);
-    expect((await merchantContract.getSellableItemOffer(offerId)).uses).to.equal(1);
+    expect((await merchantContract.offer(offerId)).uses).to.equal(1);
     expect(await tokenContract.balanceOf(seller.address) * 1).to.equal(sellPrice * 1);
   });
 
   it('Should process sell offer that transfers currency', async () => {
     const sellPrice = getTokenDecimalAmount(15);
+    const offerId = 43;
 
-    await setGenericItemOffer('sellable', sellPrice, 0, false);
+    await setGenericOffer(ENUM_SELLABLE_OFFER, offerId, sellPrice, 0, false);
 
     const seller = otherAddresses[0];
-    const offerId = await merchantContract.sellableItemOfferIds(0);
-    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await itemsContract.mintToAddress(seller.address, itemId, 1);
     await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
     await tokenContract.mint(merchantContract.address, sellPrice);
-    await merchantContract.connect(seller).sell(offerId);
+    await merchantContract.connect(seller).useOffer(offerId);
 
     expect(await itemsContract.balanceOf(seller.address, itemId) * 1).to.equal(0);
     expect(await itemsContract.balanceOf(merchantContract.address, itemId) * 1).to.equal(1);
     expect(await tokenContract.balanceOf(seller.address) * 1).to.equal(sellPrice * 1);
     expect(await tokenContract.balanceOf(merchantContract.address) * 1).to.equal(0);
-    expect((await merchantContract.getSellableItemOffer(offerId)).uses).to.equal(1);
+    expect((await merchantContract.offer(offerId)).uses).to.equal(1);
   });
 
   it('Should process buy offer using native chain token', async () => {
     const itemPrice = getTokenDecimalAmount(2);
     const itemId = 3;
+    const offerId = 542;
 
-    await setItemOffer(
-      'buyable',
+    await setOffer(
+      ENUM_BUYABLE_OFFER,
+      offerId,
       itemsContract.address,
       [ itemId ],
       [ 1 ],
@@ -293,9 +286,8 @@ describe('Game_Items_Merchant', () => {
 
     const buyer = otherAddresses[0];
     const buyerStartBalance = await buyer.getBalance() * 1; // 10000~
-    const offerId = await merchantContract.buyableItemOfferIds(0);
 
-    await merchantContract.connect(buyer).buy(offerId, {
+    await merchantContract.connect(buyer).useOffer(offerId, {
       value: itemPrice,
     });
 
@@ -307,9 +299,11 @@ describe('Game_Items_Merchant', () => {
   it('Should process sell offer using native chain token', async () => {
     const sellPrice = getTokenDecimalAmount(2);
     const itemId = 3;
+    const offerId = 765;
 
-    await setItemOffer(
-      'sellable',
+    await setOffer(
+      ENUM_SELLABLE_OFFER,
+      offerId,
       itemsContract.address,
       [ itemId ],
       [ 1 ],
@@ -321,7 +315,6 @@ describe('Game_Items_Merchant', () => {
 
     const seller = otherAddresses[0];
     const sellerStartBalance = await seller.getBalance() * 1; // 10000~
-    const offerId = await merchantContract.sellableItemOfferIds(0);
 
     // fund merchant
     await owner.sendTransaction({
@@ -331,7 +324,7 @@ describe('Game_Items_Merchant', () => {
 
     await itemsContract.mintToAddress(seller.address, itemId, 1);
     await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
-    await merchantContract.connect(seller).sell(offerId);
+    await merchantContract.connect(seller).useOffer(offerId);
 
     expect(await seller.getBalance() * 1).to.be.above(sellerStartBalance);
     expect(await seller.provider.getBalance(merchantContract.address) * 1).to.equal(0);
@@ -340,96 +333,100 @@ describe('Game_Items_Merchant', () => {
 
   it('Fails to process buy offer when not approved to mint items and merchant does not own items to fulfill', async () => {
     const itemPrice = getTokenDecimalAmount(10);
+    const offerId = 8568;
 
-    await setGenericItemOffer('buyable', itemPrice, 0, false);
+    await setGenericOffer(ENUM_BUYABLE_OFFER, offerId, itemPrice, 0, false);
 
     const buyer = otherAddresses[0];
-    const offerId = await merchantContract.buyableItemOfferIds(0);
-    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await tokenContract.mint(buyer.address, itemPrice);
     await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
-    await expect(merchantContract.connect(buyer).buy(offerId)).to.be.reverted;
+    await expect(merchantContract.connect(buyer).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to process sell offer when not approved to mint currency and merchant does not own tokens to fulfill', async () => {
     const sellPrice = getTokenDecimalAmount(15);
+    const offerId = 99112;
 
-    await setGenericItemOffer('sellable', sellPrice, 0, false);
+    await setGenericOffer(ENUM_SELLABLE_OFFER, offerId, sellPrice, 0, false);
 
     const seller = otherAddresses[0];
-    const offerId = await merchantContract.sellableItemOfferIds(0);
-    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await itemsContract.mintToAddress(seller.address, itemId, 1);
     await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
-    await expect(merchantContract.connect(seller).sell(offerId)).to.be.reverted;
+    await expect(merchantContract.connect(seller).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to process buy offer when max uses have been reached', async () => {
     const itemPrice = getTokenDecimalAmount(10);
+    const offerId = 1010;
 
-    await setGenericItemOffer('buyable', itemPrice, 1, true);
+    await setGenericOffer(ENUM_BUYABLE_OFFER, offerId, itemPrice, 1, true);
 
     const buyer = otherAddresses[0];
-    const offerId = await merchantContract.buyableItemOfferIds(0);
-    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await tokenContract.mint(buyer.address, itemPrice.mul(2));
     await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
-    await merchantContract.connect(buyer).buy(offerId);
-    await expect(merchantContract.connect(buyer).buy(offerId)).to.be.reverted; // single use
+    await merchantContract.connect(buyer).useOffer(offerId);
+    await expect(merchantContract.connect(buyer).useOffer(offerId)).to.be.reverted; // single use
   });
 
   it('Fails to process sell offer when max uses have been reached', async () => {
     const sellPrice = getTokenDecimalAmount(15);
+    const offerId = 99331;
 
-    await setGenericItemOffer('sellable', sellPrice, 1, true);
+    await setGenericOffer(ENUM_SELLABLE_OFFER, offerId, sellPrice, 1, true);
 
     const seller = otherAddresses[0];
-    const offerId = await merchantContract.sellableItemOfferIds(0);
-    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await itemsContract.mintToAddress(seller.address, itemId, 2);
     await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
-    await merchantContract.connect(seller).sell(offerId);
-    await expect(merchantContract.connect(seller).sell(offerId)).to.be.reverted;
+    await merchantContract.connect(seller).useOffer(offerId);
+    await expect(merchantContract.connect(seller).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to process buy offer when sender does not have enough required token', async () => {
     const itemPrice = getTokenDecimalAmount(10);
+    const offerId = 33432;
 
-    await setGenericItemOffer('buyable', itemPrice, 1, true);
+    await setGenericOffer(ENUM_BUYABLE_OFFER, offerId, itemPrice, 1, true);
 
     const buyer = otherAddresses[0];
-    const offerId = await merchantContract.buyableItemOfferIds(0);
-    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await tokenContract.connect(buyer).approve(merchantContract.address, itemPrice);
-    await expect(merchantContract.connect(buyer).buy(offerId)).to.be.reverted;
+    await expect(merchantContract.connect(buyer).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to process sell offer when sender does not have required items', async () => {
     const sellPrice = getTokenDecimalAmount(15);
+    const offerId = 5050;
 
-    await setGenericItemOffer('sellable', sellPrice, 1, true);
+    await setGenericOffer(ENUM_SELLABLE_OFFER, offerId, sellPrice, 1, true);
 
     const seller = otherAddresses[0];
-    const offerId = await merchantContract.sellableItemOfferIds(0);
-    const offer = await merchantContract.getSellableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
 
     await itemsContract.connect(seller).setApprovalForAll(merchantContract.address, true);
-    await expect(merchantContract.connect(seller).sell(offerId)).to.be.reverted;
+    await expect(merchantContract.connect(seller).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to set buyable and sellable offers when not owner', async () => {
+    const offerId = 5421;
+
     const args = [
+      offerId,
+      ENUM_BUYABLE_OFFER,
       itemsContract.address,
       [ 1 ],
       [ 1 ],
@@ -438,19 +435,18 @@ describe('Game_Items_Merchant', () => {
       0,
     ];
 
-    await expect(merchantContract.connect(otherAddresses[0]).setBuyableItemOffer(...args)).to.be.reverted;
-    await expect(merchantContract.connect(otherAddresses[0]).setSellableItemOffer(...args)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).setOffer(...args)).to.be.reverted;
   });
 
   it('Fails to remove buyable and sellable offers when not owner', async () => {
-    await setGenericItemOffer('buyable', getTokenDecimalAmount(1), 0, true);
-    await setGenericItemOffer('sellable', getTokenDecimalAmount(1), 0, true);
+    const buyableOfferId  = 482;
+    const sellableOfferId = 317;
 
-    const buyableItemOfferId = merchantContract.buyableItemOfferIds(0);
-    const sellableItemOfferId = merchantContract.sellableItemOfferIds(0);
+    await setGenericOffer(ENUM_BUYABLE_OFFER, buyableOfferId, getTokenDecimalAmount(1), 0, true);
+    await setGenericOffer(ENUM_SELLABLE_OFFER, sellableOfferId, getTokenDecimalAmount(1), 0, true);
 
-    await expect(merchantContract.connect(otherAddresses[0]).removeBuyableItemOffer(buyableItemOfferId)).to.be.reverted;
-    await expect(merchantContract.connect(otherAddresses[0]).removeSellableItemOffer(sellableItemOfferId)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).removeOffer(buyableOfferId)).to.be.reverted;
+    await expect(merchantContract.connect(otherAddresses[0]).removeOffer(sellableOfferId)).to.be.reverted;
   });
 
   /*
@@ -520,20 +516,19 @@ describe('Game_Items_Merchant', () => {
     const chainId = 31337; // hardhat
     const sender = otherAddresses[1];
     const recipient = otherAddresses[2];
+    const offerId = 94884;
 
-    await setGenericItemOffer('buyable', getTokenDecimalAmount(10), 0, true);
+    await setGenericOffer(ENUM_BUYABLE_OFFER, offerId, getTokenDecimalAmount(10), 0, true);
     await tokenContract.mint(sender.address, getTokenDecimalAmount(10));
     await tokenContract.connect(sender).approve(merchantContract.address, getTokenDecimalAmount(10));
 
-    const offerId = await merchantContract.buyableItemOfferIds(0);
-    const offer = await merchantContract.getBuyableItemOffer(offerId);
+    const offer = await merchantContract.offer(offerId);
     const itemId = offer.itemIds[0];
-
 
     // create request object
     const data = [ offerId ];
-    const gasEstimate = await merchantContract.connect(sender).estimateGas.buy(offerId);
-    const callData = merchantContract.interface.encodeFunctionData('buy', data);
+    const gasEstimate = await merchantContract.connect(sender).estimateGas.useOffer(offerId);
+    const callData = merchantContract.interface.encodeFunctionData('useOffer', data);
     const forwardRequest = {
       from: sender.address,
       to: merchantContract.address,
@@ -597,24 +592,20 @@ describe('Game_Items_Merchant', () => {
    * Helpers
    */
 
-  async function setItemOffer(type, itemsAddress, itemIds, itemAmounts, currencyAddress, currencyAmount, maxUses, canMint = false) {
-    let setOfferFunc;
-
-    if (type === 'buyable') {
-      setOfferFunc = merchantContract.setBuyableItemOffer;
-
+  async function setOffer(type, offerId, itemsAddress, itemIds, itemAmounts, currencyAddress, currencyAmount, maxUses, canMint = false) {
+    if (type === ENUM_BUYABLE_OFFER) {
       if (canMint) {
         await itemsContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), merchantContract.address);
       }
     } else {
-      setOfferFunc = merchantContract.setSellableItemOffer;
-
       if (canMint) {
         await tokenContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), merchantContract.address);
       }
     }
 
-    return setOfferFunc(
+    return merchantContract.setOffer(
+      offerId,
+      type,
       itemsAddress,
       itemIds,
       itemAmounts,
@@ -624,9 +615,10 @@ describe('Game_Items_Merchant', () => {
     );
   }
 
-  async function setGenericItemOffer(type, currencyAmount, maxUses, canMint) {
-    return setItemOffer(
+  async function setGenericOffer(type, id, currencyAmount, maxUses, canMint) {
+    return setOffer(
       type,
+      id,
       itemsContract.address,
       [ Math.floor(Math.random() * 1000) ],
       [ 1 ],

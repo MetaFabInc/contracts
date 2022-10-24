@@ -21,8 +21,8 @@ import "../common/Roles.sol";
 contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable, Roles, AccessControl, ReentrancyGuard, ERC1155Holder {
   using EnumerableSet for EnumerableSet.UintSet;
 
-  EnumerableSet.UintSet private itemOfferIds;
-  mapping(uint256 => ItemOffer) private itemOffers;
+  EnumerableSet.UintSet private offerIds;
+  mapping(uint256 => Offer) private offers;
 
   constructor(address _forwarder)
   ERC2771Context_Upgradeable(_forwarder) {
@@ -34,107 +34,101 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
    * @dev Offer data retrieval
    */
 
-  function allItemOfferIds() external view returns (uint256[] memory) {
-    return itemOfferIds.values();
+  function allOfferIds() external view returns (uint256[] memory) {
+    return offerIds.values();
   }
 
-  function allItemOffers() external view returns (ItemOffer[] memory) {
-    uint256 totalOffers = itemOfferIds.length();
-    ItemOffer[] memory offers = new ItemOffer[](totalOffers);
+  function allOffers() external view returns (Offer[] memory) {
+    Offer[] memory offersResult = new Offer[](totalOffers());
 
-    for (uint256 i = 0; i < totalOffers; i++) {
-      offers[i] = itemOffers[itemOfferIds.at(i)];
+    for (uint256 i = 0; i < totalOffers(); i++) {
+      offersResult[i] = offers[offerIds.at(i)];
     }
 
-    return offers;
+    return offersResult;
   }
 
-  function allItemOfferLastUpdates() external view returns (uint256[][] memory) {
-    uint256 totalOffers = itemOfferIds.length();
-    uint256[][] memory offerLastUpdates = new uint256[][](totalOffers);
+  function allOfferLastUpdates() external view returns (uint256[][] memory) {
+    uint256[][] memory offerLastUpdates = new uint256[][](totalOffers());
 
-    for (uint256 i = 0; i < totalOffers; i++) {
-      uint256[] memory offerLastUpdate = new uint256[](2);
-
-      offerLastUpdate[0] = itemOfferIds.at(i);
-      offerLastUpdate[1] = itemOffers[offerLastUpdate[0]].lastUpdatedAt;
-
-      offerLastUpdates[i] = offerLastUpdate;
+    for (uint256 i = 0; i < totalOffers(); i++) {
+      offerLastUpdates[i] = offerLastUpdate(offerIds.at(i));
     }
 
     return offerLastUpdates;
   }
 
-  function paginateItemOfferIds(uint256 _startIndexInclusive, uint256 _limit) external view returns(uint256[] memory) {
-    uint256 totalPaginatable = _startIndexInclusive < itemOfferIds.length() ? itemOfferIds.length() - _startIndexInclusive : 0;
+  function paginateOfferIds(uint256 _startIndexInclusive, uint256 _limit) external view returns(uint256[] memory) {
+    uint256 totalPaginatable = _startIndexInclusive < offerIds.length() ? offerIds.length() - _startIndexInclusive : 0;
     uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
 
-    uint256[] memory offerIds = new uint256[](totalPaginate);
+    uint256[] memory paginatedOfferIds = new uint256[](totalPaginate);
 
     for (uint256 i = 0; i < totalPaginate; i++) {
-      offerIds[i] = itemOfferIds.at(_startIndexInclusive + i);
+      paginatedOfferIds[i] = offerIds.at(_startIndexInclusive + i);
     }
 
-    return offerIds;
+    return paginatedOfferIds;
   }
 
-  function paginateItemOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns(ItemOffer[] memory) {
-    uint256 totalPaginatable = _startIndexInclusive < itemOfferIds.length() ? itemOfferIds.length() - _startIndexInclusive : 0;
+  function paginateOffers(uint256 _startIndexInclusive, uint256 _limit) external view returns(Offer[] memory) {
+    uint256 totalPaginatable = _startIndexInclusive < offerIds.length() ? offerIds.length() - _startIndexInclusive : 0;
     uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
-    ItemOffer[] memory offers = new ItemOffer[](totalPaginate);
+
+    Offer[] memory paginatedOffers = new Offer[](totalPaginate);
 
     for (uint256 i = 0; i < totalPaginate; i++) {
-      offers[i] = itemOffers[itemOfferIds.at(_startIndexInclusive + i)];
+      paginatedOffers[i] = offers[offerIds.at(_startIndexInclusive + i)];
     }
 
-    return offers;
+    return paginatedOffers;
   }
 
-  function paginateItemOfferLastUpdates(uint256 _startIndexInclusive, uint256 _limit) external view returns(uint256[][] memory) {
-    uint256 totalPaginatable = _startIndexInclusive < itemOfferIds.length() ? itemOfferIds.length() - _startIndexInclusive : 0;
+  function paginateOfferLastUpdates(uint256 _startIndexInclusive, uint256 _limit) external view returns(uint256[][] memory) {
+    uint256 totalPaginatable = _startIndexInclusive < offerIds.length() ? offerIds.length() - _startIndexInclusive : 0;
     uint256 totalPaginate = totalPaginatable <= _limit ? totalPaginatable : _limit;
 
-    uint256[][] memory offerLastUpdates = new uint256[][](totalPaginate);
+    uint256[][] memory paginatedOfferLastUpdates = new uint256[][](totalPaginate);
 
     for(uint256 i = 0; i < totalPaginate; i++) {
-      offerLastUpdates[i] = itemOfferLastUpdate(itemOfferIds.at(_startIndexInclusive + i));
+      paginatedOfferLastUpdates[i] = offerLastUpdate(offerIds.at(_startIndexInclusive + i));
     }
 
-    return offerLastUpdates;
+    return paginatedOfferLastUpdates;
   }
 
-  function itemOfferId(uint256 _index) external view returns (uint256) {
-    require(_index < itemOfferIds.length(), "Index out of bounds");
+  function offerId(uint256 _index) external view returns (uint256) {
+    require(_index < offerIds.length(), "Index out of bounds");
 
-    return itemOfferIds.at(_index);
+    return offerIds.at(_index);
   }
 
-  function itemOffer(uint256 _itemOfferId) external view returns (ItemOffer memory) {
-    require(itemOfferIds.contains(_itemOfferId), "itemOfferId does not exist or has been removed.");
+  function offer(uint256 _offerId) external view returns (Offer memory) {
+    require(offerIds.contains(_offerId), "offerId does not exist or has been removed.");
 
-    return itemOffers[_itemOfferId];
+    return offers[_offerId];
   }
 
-  function itemOfferLastUpdate(uint256 _itemOfferId) public view returns (uint256[] memory) {
-    uint256[] memory offerLastUpdate = new uint256[](2);
+  function offerLastUpdate(uint256 _offerId) public view returns (uint256[] memory) {
+    uint256[] memory offerLastUpdateResult = new uint256[](2);
 
-    offerLastUpdate[0] = _itemOfferId;
-    offerLastUpdate[1] = itemOffers[_itemOfferId].lastUpdatedAt;
+    offerLastUpdateResult[0] = _offerId;
+    offerLastUpdateResult[1] = offers[_offerId].lastUpdatedAt;
 
-    return offerLastUpdate;
+    return offerLastUpdateResult;
   }
 
-  function totalItemOffers() external view returns (uint256) {
-    return itemOfferIds.length();
+  function totalOffers() public view returns (uint256) {
+    return offerIds.length();
   }
 
   /**
    * @dev Management
    */
 
-  function setItemOffer(
-    uint256 _itemOfferId,
-    ItemOfferType _type,
+  function setOffer(
+    uint256 _offerId,
+    OfferType _type,
     address _itemsCollectionAddress,
     uint256[] calldata _itemIds,
     uint256[] calldata _itemAmounts,
@@ -142,15 +136,15 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
     uint256 _currencyAmount,
     uint256 _maxUses
   ) external onlyRole(OWNER_ROLE) {
-    require (_type == ItemOfferType.BUYABLE || _type == ItemOfferType.SELLABLE, "Invalid offer type");
+    require (_type == OfferType.BUYABLE || _type == OfferType.SELLABLE, "Invalid offer type");
     require(IERC1155_Game_Items_Collection(_itemsCollectionAddress).supportsInterface(type(IERC1155_Game_Items_Collection).interfaceId), "Invalid items contract");
 
-    ItemOffer memory offer = ItemOffer({
-      id: _itemOfferId,
+    Offer memory offerSet = Offer({
+      id: _offerId,
       itemIds: _itemIds,
       itemAmounts: _itemAmounts,
       currencyAmount: _currencyAmount,
-      uses: itemOffers[_itemOfferId].uses,
+      uses: offers[_offerId].uses,
       maxUses: _maxUses,
       lastUpdatedAt: block.timestamp,
       offerType: _type,
@@ -158,73 +152,73 @@ contract Game_Items_Merchant is IGame_Items_Merchant, ERC2771Context_Upgradeable
       currency: IERC20(_currencyAddress)
     });
 
-    itemOfferIds.add(_itemOfferId);
-    itemOffers[_itemOfferId] = offer;
+    offerIds.add(_offerId);
+    offers[_offerId] = offerSet;
 
-    if (_type == ItemOfferType.BUYABLE) {
-      emit BuyOfferSet(_itemOfferId, offer);
+    if (_type == OfferType.BUYABLE) {
+      emit BuyOfferSet(_offerId, offerSet);
     } else {
-      emit SellOfferSet(_itemOfferId, offer);
+      emit SellOfferSet(_offerId, offerSet);
     }
   }
 
-  function removeItemOffer(uint256 _itemOfferId) external onlyRole(OWNER_ROLE) {
-    itemOfferIds.remove(_itemOfferId);
+  function removeOffer(uint256 _offerId) external onlyRole(OWNER_ROLE) {
+    offerIds.remove(_offerId);
 
-    ItemOffer storage offer = itemOffers[_itemOfferId];
+    Offer storage offerRemoved = offers[_offerId];
 
-    if (offer.offerType == ItemOfferType.BUYABLE) {
-      emit BuyOfferRemoved(_itemOfferId, offer);
+    if (offerRemoved.offerType == OfferType.BUYABLE) {
+      emit BuyOfferRemoved(_offerId, offerRemoved);
     } else {
-      emit SellOfferRemoved(_itemOfferId, offer);
+      emit SellOfferRemoved(_offerId, offerRemoved);
     }
 
-    offer.uses = 0;
+    offerRemoved.uses = 0;
   }
 
-  function useItemOffer(uint256 _itemOfferId) external payable nonReentrant {
-    require(itemOfferIds.contains(_itemOfferId), "itemOfferId does not exist or has been removed.");
+  function useOffer(uint256 _offerId) external payable nonReentrant {
+    require(offerIds.contains(_offerId), "offerId does not exist or has been removed.");
 
-    ItemOffer storage offer = itemOffers[_itemOfferId];
-    require(offer.maxUses == 0 || offer.uses < offer.maxUses, "Offer has reached max uses.");
+    Offer storage offerUsed = offers[_offerId];
+    require(offerUsed.maxUses == 0 || offerUsed.uses < offerUsed.maxUses, "Offer has reached max uses.");
 
     // BUY OFFERS
-    if (offer.offerType == ItemOfferType.BUYABLE) {
-      if (address(offer.currency) != address(0)) { // erc20
-        offer.currency.transferFrom(_msgSender(), address(this), offer.currencyAmount);
+    if (offerUsed.offerType == OfferType.BUYABLE) {
+      if (address(offerUsed.currency) != address(0)) { // erc20
+        offerUsed.currency.transferFrom(_msgSender(), address(this), offerUsed.currencyAmount);
       } else { // native token
-        require(msg.value >= offer.currencyAmount, "Payment less than cost");
+        require(msg.value >= offerUsed.currencyAmount, "Payment less than cost");
       }
 
-      if (_merchantCanMint(address(offer.itemsCollection))) {
-        offer.itemsCollection.mintBatchToAddress(_msgSender(), offer.itemIds, offer.itemAmounts);
+      if (_merchantCanMint(address(offerUsed.itemsCollection))) {
+        offerUsed.itemsCollection.mintBatchToAddress(_msgSender(), offerUsed.itemIds, offerUsed.itemAmounts);
       } else {
-        offer.itemsCollection.safeBatchTransferFrom(address(this), _msgSender(), offer.itemIds, offer.itemAmounts, "");
+        offerUsed.itemsCollection.safeBatchTransferFrom(address(this), _msgSender(), offerUsed.itemIds, offerUsed.itemAmounts, "");
       }
 
-      emit Buy(_itemOfferId, offer, _msgSender());
+      emit Buy(_offerId, offerUsed, _msgSender());
     }
 
     // SELL OFFERS
-    if (offer.offerType == ItemOfferType.SELLABLE) {
-      offer.itemsCollection.safeBatchTransferFrom(_msgSender(), address(this), offer.itemIds, offer.itemAmounts, "");
+    if (offerUsed.offerType == OfferType.SELLABLE) {
+      offerUsed.itemsCollection.safeBatchTransferFrom(_msgSender(), address(this), offerUsed.itemIds, offerUsed.itemAmounts, "");
 
-      if (address(offer.currency) != address(0)) { // erc20
-        if (_merchantCanMint(address(offer.currency))) {
-          IERC20_Game_Currency gameCurrency = IERC20_Game_Currency(address(offer.currency));
-          gameCurrency.mint(_msgSender(), offer.currencyAmount);
+      if (address(offerUsed.currency) != address(0)) { // erc20
+        if (_merchantCanMint(address(offerUsed.currency))) {
+          IERC20_Game_Currency gameCurrency = IERC20_Game_Currency(address(offerUsed.currency));
+          gameCurrency.mint(_msgSender(), offerUsed.currencyAmount);
         } else { // native token
-          offer.currency.transfer(_msgSender(), offer.currencyAmount);
+          offerUsed.currency.transfer(_msgSender(), offerUsed.currencyAmount);
         }
       } else {
-        revert("Payable sell offers not enabled.");
-        //payable(_msgSender()).transfer(offer.currencyAmount);
+        //revert("Payable sell offers not enabled.");
+        payable(_msgSender()).transfer(offerUsed.currencyAmount);
       }
 
-      emit Sell(_itemOfferId, offer, _msgSender());
+      emit Sell(_offerId, offerUsed, _msgSender());
     }
 
-    offer.uses++;
+    offerUsed.uses++;
   }
 
   /**
