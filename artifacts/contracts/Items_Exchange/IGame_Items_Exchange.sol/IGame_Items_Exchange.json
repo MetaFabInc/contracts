@@ -21,52 +21,52 @@
             },
             {
               "internalType": "contract IERC1155",
-              "name": "requiredItemsCollection",
+              "name": "inputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "requiredCurrency",
+              "name": "inputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "requiredItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "requiredItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "requiredCurrencyAmount",
+              "name": "inputCurrencyAmount",
               "type": "uint256"
             },
             {
               "internalType": "contract IERC1155",
-              "name": "givenItemsCollection",
+              "name": "outputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "givenCurrency",
+              "name": "outputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "givenItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "givenItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "givenCurrencyAmount",
+              "name": "outputCurrencyAmount",
               "type": "uint256"
             },
             {
@@ -112,52 +112,52 @@
             },
             {
               "internalType": "contract IERC1155",
-              "name": "requiredItemsCollection",
+              "name": "inputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "requiredCurrency",
+              "name": "inputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "requiredItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "requiredItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "requiredCurrencyAmount",
+              "name": "inputCurrencyAmount",
               "type": "uint256"
             },
             {
               "internalType": "contract IERC1155",
-              "name": "givenItemsCollection",
+              "name": "outputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "givenCurrency",
+              "name": "outputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "givenItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "givenItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "givenCurrencyAmount",
+              "name": "outputCurrencyAmount",
               "type": "uint256"
             },
             {
@@ -203,52 +203,52 @@
             },
             {
               "internalType": "contract IERC1155",
-              "name": "requiredItemsCollection",
+              "name": "inputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "requiredCurrency",
+              "name": "inputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "requiredItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "requiredItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "requiredCurrencyAmount",
+              "name": "inputCurrencyAmount",
               "type": "uint256"
             },
             {
               "internalType": "contract IERC1155",
-              "name": "givenItemsCollection",
+              "name": "outputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "givenCurrency",
+              "name": "outputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "givenItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "givenItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "givenCurrencyAmount",
+              "name": "outputCurrencyAmount",
               "type": "uint256"
             },
             {
@@ -321,52 +321,52 @@
             },
             {
               "internalType": "contract IERC1155",
-              "name": "requiredItemsCollection",
+              "name": "inputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "requiredCurrency",
+              "name": "inputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "requiredItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "requiredItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "requiredCurrencyAmount",
+              "name": "inputCurrencyAmount",
               "type": "uint256"
             },
             {
               "internalType": "contract IERC1155",
-              "name": "givenItemsCollection",
+              "name": "outputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "givenCurrency",
+              "name": "outputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "givenItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "givenItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "givenCurrencyAmount",
+              "name": "outputCurrencyAmount",
               "type": "uint256"
             },
             {
@@ -412,52 +412,52 @@
             },
             {
               "internalType": "contract IERC1155",
-              "name": "requiredItemsCollection",
+              "name": "inputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "requiredCurrency",
+              "name": "inputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "requiredItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "requiredItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "requiredCurrencyAmount",
+              "name": "inputCurrencyAmount",
               "type": "uint256"
             },
             {
               "internalType": "contract IERC1155",
-              "name": "givenItemsCollection",
+              "name": "outputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "givenCurrency",
+              "name": "outputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "givenItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "givenItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "givenCurrencyAmount",
+              "name": "outputCurrencyAmount",
               "type": "uint256"
             },
             {
@@ -594,52 +594,52 @@
             },
             {
               "internalType": "contract IERC1155",
-              "name": "requiredItemsCollection",
+              "name": "inputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "requiredCurrency",
+              "name": "inputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "requiredItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "requiredItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "requiredCurrencyAmount",
+              "name": "inputCurrencyAmount",
               "type": "uint256"
             },
             {
               "internalType": "contract IERC1155",
-              "name": "givenItemsCollection",
+              "name": "outputCollection",
               "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "outputCollectionItemAmounts",
+              "type": "uint256[]"
             },
             {
               "internalType": "contract IERC20",
-              "name": "givenCurrency",
+              "name": "outputCurrency",
               "type": "address"
             },
             {
-              "internalType": "uint256[]",
-              "name": "givenItemIds",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "givenItemAmounts",
-              "type": "uint256[]"
-            },
-            {
               "internalType": "uint256",
-              "name": "givenCurrencyAmount",
+              "name": "outputCurrencyAmount",
               "type": "uint256"
             },
             {
@@ -688,27 +688,27 @@
         },
         {
           "internalType": "address[2]",
-          "name": "_requiredGivenItemsCollections",
+          "name": "_inputOutputCollections",
           "type": "address[2]"
+        },
+        {
+          "internalType": "uint256[][2]",
+          "name": "_inputOutputCollectionItemIds",
+          "type": "uint256[][2]"
+        },
+        {
+          "internalType": "uint256[][2]",
+          "name": "_inputOutputCollectionItemAmounts",
+          "type": "uint256[][2]"
         },
         {
           "internalType": "address[2]",
-          "name": "_requiredGivenCurrency",
+          "name": "_inputOutputCurrency",
           "type": "address[2]"
         },
         {
-          "internalType": "uint256[][2]",
-          "name": "_requiredGivenItemIds",
-          "type": "uint256[][2]"
-        },
-        {
-          "internalType": "uint256[][2]",
-          "name": "_requiredGivenItemAmounts",
-          "type": "uint256[][2]"
-        },
-        {
           "internalType": "uint256[2]",
-          "name": "_requiredGivenCurrencyAmounts",
+          "name": "_inputOutputCurrencyAmounts",
           "type": "uint256[2]"
         },
         {
@@ -770,7 +770,7 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_itemsCollectionAddress",
+          "name": "_collectionAddress",
           "type": "address"
         },
         {

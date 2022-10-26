@@ -17,17 +17,17 @@ interface IGame_Items_Exchange  {
   struct Offer {
     uint256 id;
 
-    IERC1155 requiredItemsCollection;
-    IERC20 requiredCurrency;
-    uint256[] requiredItemIds;
-    uint256[] requiredItemAmounts;
-    uint256 requiredCurrencyAmount;
+    IERC1155 inputCollection;
+    uint256[] inputCollectionItemIds;
+    uint256[] inputCollectionItemAmounts;
+    IERC20 inputCurrency;
+    uint256 inputCurrencyAmount;
 
-    IERC1155 givenItemsCollection;
-    IERC20 givenCurrency;
-    uint256[] givenItemIds;
-    uint256[] givenItemAmounts;
-    uint256 givenCurrencyAmount;
+    IERC1155 outputCollection;
+    uint256[] outputCollectionItemIds;
+    uint256[] outputCollectionItemAmounts;
+    IERC20 outputCurrency;
+    uint256 outputCurrencyAmount;
 
     uint256 uses;
     uint256 maxUses;
@@ -54,11 +54,11 @@ interface IGame_Items_Exchange  {
 
   function setOffer(
     uint256 _offerId,
-    address[2] calldata _requiredGivenItemsCollections, // 0: requiredItemsCollection, 1: givenItemsCollection
-    address[2] calldata _requiredGivenCurrency,         // 0: requiredCurrency, 1: givenCurrency
-    uint256[][2] calldata _requiredGivenItemIds,        // 0: requiredItemIds, 1: givenItemIds
-    uint256[][2] calldata _requiredGivenItemAmounts,    // 0: requiredItemAmounts, 1: givenItemAmounts
-    uint256[2] calldata _requiredGivenCurrencyAmounts,  // 0: requiredCurrencyAmounts, 1: givenCurrencyAmounts
+    address[2] calldata _inputOutputCollections,              // 0: inputItemsCollection, 1: outputItemsCollection
+    uint256[][2] calldata _inputOutputCollectionItemIds,      // 0: inputItemIds, 1: outputItemIds
+    uint256[][2] calldata _inputOutputCollectionItemAmounts,  // 0: inputItemAmounts, 1: outputItemAmounts
+    address[2] calldata _inputOutputCurrency,                 // 0: inputCurrency, 1: outputCurrency
+    uint256[2] calldata _inputOutputCurrencyAmounts,          // 0: inputCurrencyAmounts, 1: outputCurrencyAmounts
     uint256 _maxUses
   ) external;
   function removeOffer(uint256 _offerId) external;
@@ -66,5 +66,5 @@ interface IGame_Items_Exchange  {
 
   function withdrawTo(address _to) external;
   function withdrawCurrencyTo(address _currencyAddress, address _to) external;
-  function withdrawItemsTo(address _itemsCollectionAddress, uint256[] calldata _itemIds, address _to) external;
+  function withdrawItemsTo(address _collectionAddress, uint256[] calldata _itemIds, address _to) external;
 }

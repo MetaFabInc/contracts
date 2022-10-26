@@ -1,4 +1,3 @@
-return;
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { BigNumber } = ethers;
@@ -406,7 +405,7 @@ describe('ERC1155_Game_Items_Collection', () => {
     for (let i = 0; i < 50; i++) {
       await mintItemToAddress(owner.address, Math.floor((Math.random() * 10000)), 1);
     }
-
+    await new Promise(resolve => setTimeout(resolve, 500)); // local chain can lag
     const allBalances = await itemsContract.balanceOfAll(owner.address);
 
     expect(allBalances.length).to.equal(50);

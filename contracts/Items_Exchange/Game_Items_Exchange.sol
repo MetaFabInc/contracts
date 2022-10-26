@@ -129,28 +129,28 @@ contract Game_Items_Exchange is IGame_Items_Exchange, ERC2771Context_Upgradeable
 
   function setOffer(
     uint256 _offerId,
-    address[2] calldata _requiredGivenItemsCollections, // 0: requiredItemsCollection, 1: givenItemsCollection
-    address[2] calldata _requiredGivenCurrency,         // 0: requiredCurrency, 1: givenCurrency
-    uint256[][2] calldata _requiredGivenItemIds,        // 0: requiredItemIds, 1: givenItemIds
-    uint256[][2] calldata _requiredGivenItemAmounts,    // 0: requiredItemAmounts, 1: givenItemAmounts
-    uint256[2] calldata _requiredGivenCurrencyAmounts,  // 0: requiredCurrencyAmounts, 1: givenCurrencyAmounts
+    address[2] calldata _inputOutputCollections,              // 0: inputItemsCollection, 1: outputItemsCollection
+    uint256[][2] calldata _inputOutputCollectionItemIds,      // 0: inputItemIds, 1: outputItemIds
+    uint256[][2] calldata _inputOutputCollectionItemAmounts,  // 0: inputItemAmounts, 1: outputItemAmounts
+    address[2] calldata _inputOutputCurrency,                 // 0: inputCurrency, 1: outputCurrency
+    uint256[2] calldata _inputOutputCurrencyAmounts,          // 0: inputCurrencyAmounts, 1: outputCurrencyAmounts
     uint256 _maxUses
   ) external onlyRole(OWNER_ROLE) {
-    require(_requiredGivenItemIds[0].length == _requiredGivenItemAmounts[0].length, "requiredItemIds and requiredItemAmounts size mistmatch");
-    require(_requiredGivenItemIds[1].length == _requiredGivenItemAmounts[1].length, "givenItemIds and givenItemAmounts size mismatch");
+    require(_inputOutputCollectionItemIds[0].length == _inputOutputCollectionItemAmounts[0].length, "");
+    require(_inputOutputCollectionItemIds[1].length == _inputOutputCollectionItemAmounts[1].length, "");
 
     Offer memory offerSet = Offer({
       id: _offerId,
-      requiredItemsCollection: IERC1155(_requiredGivenItemsCollections[0]),
-      requiredCurrency: IERC20_Game_Currency(_requiredGivenCurrency[0]),
-      requiredItemIds: _requiredGivenItemIds[0],
-      requiredItemAmounts: _requiredGivenItemAmounts[0],
-      requiredCurrencyAmount: _requiredGivenCurrencyAmounts[0],
-      givenItemsCollection: IERC1155(_requiredGivenItemsCollections[1]),
-      givenCurrency: IERC20_Game_Currency(_requiredGivenCurrency[1]),
-      givenItemIds: _requiredGivenItemIds[1],
-      givenItemAmounts: _requiredGivenItemAmounts[1],
-      givenCurrencyAmount: _requiredGivenCurrencyAmounts[1],
+      inputCollection: IERC1155(_inputOutputCollections[0]),
+      inputCollectionItemIds: _inputOutputCollectionItemIds[0],
+      inputCollectionItemAmounts: _inputOutputCollectionItemAmounts[0],
+      inputCurrency: IERC20_Game_Currency(_inputOutputCurrency[0]),
+      inputCurrencyAmount: _inputOutputCurrencyAmounts[0],
+      outputCollection: IERC1155(_inputOutputCollections[1]),
+      outputCollectionItemIds: _inputOutputCollectionItemIds[1],
+      outputCollectionItemAmounts: _inputOutputCollectionItemAmounts[1],
+      outputCurrency: IERC20_Game_Currency(_inputOutputCurrency[1]),
+      outputCurrencyAmount: _inputOutputCurrencyAmounts[1],
       uses: offers[_offerId].uses,
       maxUses: _maxUses,
       lastUpdatedAt: block.timestamp
@@ -178,36 +178,36 @@ contract Game_Items_Exchange is IGame_Items_Exchange, ERC2771Context_Upgradeable
     Offer storage offerUsed = offers[_offerId];
     require(offerUsed.maxUses == 0 || offerUsed.uses < offerUsed.maxUses, "Offer has reached max uses.");
 
-    if (address(offerUsed.requiredItemsCollection) != address(0)) {
-      offerUsed.requiredItemsCollection.safeBatchTransferFrom(_msgSender(), address(this), offerUsed.requiredItemIds, offerUsed.requiredItemAmounts, "");
+    if (address(offerUsed.inputCollection) != address(0)) {
+        offerUsed.inputCollection.safeBatchTransferFrom(_msgSender(), address(this), offerUsed.inputCollectionItemIds, offerUsed.inputCollectionItemAmounts, "");
     }
 
-    if (offerUsed.requiredCurrencyAmount > 0) {
-      if (address(offerUsed.requiredCurrency) != address(0)) {
-        offerUsed.requiredCurrency.transferFrom(_msgSender(), address(this), offerUsed.requiredCurrencyAmount);
+    if (offerUsed.inputCurrencyAmount > 0) {
+      if (address(offerUsed.inputCurrency) != address(0)) {
+        offerUsed.inputCurrency.transferFrom(_msgSender(), address(this), offerUsed.inputCurrencyAmount);
       } else {
-        require(msg.value >= offerUsed.requiredCurrencyAmount, "Payment less than cost");
+        require(msg.value >= offerUsed.inputCurrencyAmount, "Payment less than cost");
       }
     }
 
-    if (address(offerUsed.givenItemsCollection) != address(0)) {
-      if (_exchangeCanMint(address(offerUsed.givenItemsCollection))) {
-        IERC1155_Game_Items_Collection gameItemsCollection = IERC1155_Game_Items_Collection(address(offerUsed.givenItemsCollection));
-        gameItemsCollection.mintBatchToAddress(_msgSender(), offerUsed.givenItemIds, offerUsed.givenItemAmounts);
+    if (address(offerUsed.outputCollection) != address(0)) {
+      if (_exchangeCanMint(address(offerUsed.outputCollection))) {
+        IERC1155_Game_Items_Collection gameItemsCollection = IERC1155_Game_Items_Collection(address(offerUsed.outputCollection));
+        gameItemsCollection.mintBatchToAddress(_msgSender(), offerUsed.outputCollectionItemIds, offerUsed.outputCollectionItemAmounts);
       } else {
-        offerUsed.givenItemsCollection.safeBatchTransferFrom(address(this), _msgSender(), offerUsed.givenItemIds, offerUsed.givenItemAmounts, "");
+        offerUsed.outputCollection.safeBatchTransferFrom(address(this), _msgSender(), offerUsed.outputCollectionItemIds, offerUsed.outputCollectionItemAmounts, "");
       }
     }
 
-    if (address(offerUsed.givenCurrency) != address(0)) {
-      if (_exchangeCanMint(address(offerUsed.givenCurrency))) {
-        IERC20_Game_Currency gameCurrency = IERC20_Game_Currency(address(offerUsed.givenCurrency));
-        gameCurrency.mint(_msgSender(), offerUsed.givenCurrencyAmount);
+    if (address(offerUsed.outputCurrency) != address(0)) {
+      if (_exchangeCanMint(address(offerUsed.outputCurrency))) {
+        IERC20_Game_Currency gameCurrency = IERC20_Game_Currency(address(offerUsed.outputCurrency));
+        gameCurrency.mint(_msgSender(), offerUsed.outputCurrencyAmount);
       } else {
-        offerUsed.givenCurrency.transfer(_msgSender(), offerUsed.givenCurrencyAmount);
+        offerUsed.outputCurrency.transfer(_msgSender(), offerUsed.outputCurrencyAmount);
       }
-    } else if (offerUsed.givenCurrencyAmount > 0) {
-      payable(_msgSender()).transfer(offerUsed.givenCurrencyAmount);
+    } else if (offerUsed.outputCurrencyAmount > 0) {
+      payable(_msgSender()).transfer(offerUsed.outputCurrencyAmount);
     }
 
     offerUsed.uses++;
@@ -229,8 +229,8 @@ contract Game_Items_Exchange is IGame_Items_Exchange, ERC2771Context_Upgradeable
     currency.transfer(_to, currency.balanceOf(address(this)));
   }
 
-  function withdrawItemsTo(address _itemsCollectionAddress, uint256[] calldata _itemIds, address _to) external onlyRole(OWNER_ROLE) {
-    IERC1155 items = IERC1155(_itemsCollectionAddress);
+  function withdrawItemsTo(address _collectionAddress, uint256[] calldata _itemIds, address _to) external onlyRole(OWNER_ROLE) {
+    IERC1155 items = IERC1155(_collectionAddress);
     uint256[] memory itemBalances = new uint256[](_itemIds.length);
 
     for (uint256 i = 0; i < _itemIds.length; i++) {

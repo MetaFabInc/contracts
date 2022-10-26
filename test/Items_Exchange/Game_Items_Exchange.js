@@ -58,90 +58,90 @@ describe('Game_Items_Exchange', () => {
    */
 
   it('Should set offer that requires currency and gives items', async () => {
-    const givenItemIds = [ 53, 45 ];
-    const givenItemAmounts = [ 1, 64 ];
-    const requiredCurrencyAmount = getTokenDecimalAmount(100);
+    const outputCollectionItemIds = [ 53, 45 ];
+    const outputCollectionItemAmounts = [ 1, 64 ];
+    const inputCurrencyAmount = getTokenDecimalAmount(100);
     const offerId = 123;
 
     await setOffer({
       offerId,
-      requiredCurrency: tokenContract.address,
-      requiredCurrencyAmount,
-      givenItemsCollection: itemsContract.address,
-      givenItemIds,
-      givenItemAmounts,
+      inputCurrency: tokenContract.address,
+      inputCurrencyAmount,
+      outputCollection: itemsContract.address,
+      outputCollectionItemIds,
+      outputCollectionItemAmounts,
       canMint: true,
     });
 
     const offer = await exchangeContract.offer(offerId);
 
     expect(offer.id * 1).to.equal(offerId);
-    expect(offer.requiredCurrencyAmount * 1).to.equal(requiredCurrencyAmount * 1);
+    expect(offer.inputCurrencyAmount * 1).to.equal(inputCurrencyAmount * 1);
     expect(offer.uses * 1).to.equal(0);
     expect(offer.maxUses * 1).to.equal(0);
     expect(offer.lastUpdatedAt * 1).to.not.equal(0);
-    expect(offer.givenItemsCollection).to.equal(itemsContract.address);
-    expect(offer.requiredCurrency).to.equal(tokenContract.address);
+    expect(offer.outputCollection).to.equal(itemsContract.address);
+    expect(offer.inputCurrency).to.equal(tokenContract.address);
 
-    for(let i = 0; i < offer.givenItemIds.length; i++) {
-      expect(offer.givenItemIds[i] * 1).to.equal(givenItemIds[i]);
+    for(let i = 0; i < offer.outputCollectionItemIds.length; i++) {
+      expect(offer.outputCollectionItemIds[i] * 1).to.equal(outputCollectionItemIds[i]);
     }
 
-    for(let i = 0; i < offer.givenItemAmounts.length; i++) {
-      expect(offer.givenItemAmounts[i] * 1).to.equal(givenItemAmounts[i]);
+    for(let i = 0; i < offer.outputCollectionItemAmounts.length; i++) {
+      expect(offer.outputCollectionItemAmounts[i] * 1).to.equal(outputCollectionItemAmounts[i]);
     }
   });
 
   it('Should set offer that requires items and gives currency', async () => {
-    const requiredItemIds = [ 53, 45 ];
-    const requiredItemAmounts = [ 1, 64 ];
-    const givenCurrencyAmount = getTokenDecimalAmount(100);
+    const inputCollectionItemIds = [ 53, 45 ];
+    const inputCollectionItemAmounts = [ 1, 64 ];
+    const outputCurrencyAmount = getTokenDecimalAmount(100);
     const offerId = 123;
 
     await setOffer({
       offerId,
-      requiredItemsCollection: itemsContract.address,
-      requiredItemIds,
-      requiredItemAmounts,
-      givenCurrency: tokenContract.address,
-      givenCurrencyAmount,
+      inputCollection: itemsContract.address,
+      inputCollectionItemIds,
+      inputCollectionItemAmounts,
+      outputCurrency: tokenContract.address,
+      outputCurrencyAmount,
       canMint: true,
     });
 
     const offer = await exchangeContract.offer(offerId);
 
     expect(offer.id * 1).to.equal(offerId);
-    expect(offer.givenCurrencyAmount * 1).to.equal(givenCurrencyAmount * 1);
+    expect(offer.outputCurrencyAmount * 1).to.equal(outputCurrencyAmount * 1);
     expect(offer.uses * 1).to.equal(0);
     expect(offer.maxUses * 1).to.equal(0);
     expect(offer.lastUpdatedAt * 1).to.not.equal(0);
-    expect(offer.requiredItemsCollection).to.equal(itemsContract.address);
-    expect(offer.givenCurrency).to.equal(tokenContract.address);
+    expect(offer.inputCollection).to.equal(itemsContract.address);
+    expect(offer.outputCurrency).to.equal(tokenContract.address);
 
-    for(let i = 0; i < offer.requiredItemIds.length; i++) {
-      expect(offer.requiredItemIds[i] * 1).to.equal(requiredItemIds[i]);
+    for(let i = 0; i < offer.inputCollectionItemIds.length; i++) {
+      expect(offer.inputCollectionItemIds[i] * 1).to.equal(inputCollectionItemIds[i]);
     }
 
-    for(let i = 0; i < offer.requiredItemAmounts.length; i++) {
-      expect(offer.requiredItemAmounts[i] * 1).to.equal(requiredItemAmounts[i]);
+    for(let i = 0; i < offer.inputCollectionItemAmounts.length; i++) {
+      expect(offer.inputCollectionItemAmounts[i] * 1).to.equal(inputCollectionItemAmounts[i]);
     }
   });
 
   it('Should set offer that requires items and gives items', async () => {
-    const requiredItemIds = [ 53, 45 ];
-    const requiredItemAmounts = [ 1, 64 ];
-    const givenItemIds = [ 11 ];
-    const givenItemAmounts = [ 5 ];
+    const inputCollectionItemIds = [ 53, 45 ];
+    const inputCollectionItemAmounts = [ 1, 64 ];
+    const outputCollectionItemIds = [ 11 ];
+    const outputCollectionItemAmounts = [ 5 ];
     const offerId = 126;
 
     await setOffer({
       offerId,
-      requiredItemsCollection: itemsContract.address,
-      requiredItemIds,
-      requiredItemAmounts,
-      givenItemsCollection: itemsContract.address,
-      givenItemIds,
-      givenItemAmounts,
+      inputCollection: itemsContract.address,
+      inputCollectionItemIds,
+      inputCollectionItemAmounts,
+      outputCollection: itemsContract.address,
+      outputCollectionItemIds,
+      outputCollectionItemAmounts,
       canMint: true,
     });
 
@@ -151,23 +151,23 @@ describe('Game_Items_Exchange', () => {
     expect(offer.uses * 1).to.equal(0);
     expect(offer.maxUses * 1).to.equal(0);
     expect(offer.lastUpdatedAt * 1).to.not.equal(0);
-    expect(offer.requiredItemsCollection).to.equal(itemsContract.address);
-    expect(offer.givenItemsCollection).to.equal(itemsContract.address);
+    expect(offer.inputCollection).to.equal(itemsContract.address);
+    expect(offer.outputCollection).to.equal(itemsContract.address);
 
-    for(let i = 0; i < offer.requiredItemIds.length; i++) {
-      expect(offer.requiredItemIds[i] * 1).to.equal(requiredItemIds[i]);
+    for(let i = 0; i < offer.inputCollectionItemIds.length; i++) {
+      expect(offer.inputCollectionItemIds[i] * 1).to.equal(inputCollectionItemIds[i]);
     }
 
-    for(let i = 0; i < offer.requiredItemAmounts.length; i++) {
-      expect(offer.requiredItemAmounts[i] * 1).to.equal(requiredItemAmounts[i]);
+    for(let i = 0; i < offer.inputCollectionItemAmounts.length; i++) {
+      expect(offer.inputCollectionItemAmounts[i] * 1).to.equal(inputCollectionItemAmounts[i]);
     }
 
-    for(let i = 0; i < offer.givenItemIds.length; i++) {
-      expect(offer.givenItemIds[i] * 1).to.equal(givenItemIds[i]);
+    for(let i = 0; i < offer.outputCollectionItemIds.length; i++) {
+      expect(offer.outputCollectionItemIds[i] * 1).to.equal(outputCollectionItemIds[i]);
     }
 
-    for(let i = 0; i < offer.givenItemAmounts.length; i++) {
-      expect(offer.givenItemAmounts[i] * 1).to.equal(givenItemAmounts[i]);
+    for(let i = 0; i < offer.outputCollectionItemAmounts.length; i++) {
+      expect(offer.outputCollectionItemAmounts[i] * 1).to.equal(outputCollectionItemAmounts[i]);
     }
   });
 
@@ -177,10 +177,10 @@ describe('Game_Items_Exchange', () => {
     for(let i = 0; i < totalOffers; i++) {
       await setGenericOffer({
         offerId: i,
-        requiredItemIds: i > 5 ? [ i * 2, 22 ] : [],
-        requiredCurrencyAmount: i > 5 ? 0 : getTokenDecimalAmount(5),
-        givenItemIds: i > 5 ? [] : [ i * 7 ],
-        givenCurrencyAmount: i > 5 ? getTokenDecimalAmount(10) : 0,
+        inputCollectionItemIds: i > 5 ? [ i * 2, 22 ] : [],
+        inputCurrencyAmount: i > 5 ? 0 : getTokenDecimalAmount(5),
+        outputCollectionItemIds: i > 5 ? [] : [ i * 7 ],
+        outputCurrencyAmount: i > 5 ? getTokenDecimalAmount(10) : 0,
         canMint: true,
       });
     }
@@ -219,8 +219,8 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredCurrencyAmount: getTokenDecimalAmount(5),
-      givenItemIds: [ 22, 53 ],
+      inputCurrencyAmount: getTokenDecimalAmount(5),
+      outputCollectionItemIds: [ 22, 53 ],
       canMint: true,
     });
 
@@ -240,8 +240,8 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredCurrencyAmount: itemPrice,
-      givenItemIds: [ 22, 53 ],
+      inputCurrencyAmount: itemPrice,
+      outputCollectionItemIds: [ 22, 53 ],
       canMint: true,
     });
 
@@ -255,8 +255,8 @@ describe('Game_Items_Exchange', () => {
     expect(await tokenContract.balanceOf(user.address) * 1).to.equal(0);
     expect(await tokenContract.balanceOf(exchangeContract.address) * 1).to.equal(itemPrice * 1);
     expect((await exchangeContract.offer(offerId)).uses).to.equal(1);
-    expect(await itemsContract.balanceOf(user.address, offer.givenItemIds[0]) * 1).to.equal(1);
-    expect(await itemsContract.balanceOf(user.address, offer.givenItemIds[1]) * 1).to.equal(1);
+    expect(await itemsContract.balanceOf(user.address, offer.outputCollectionItemIds[0]) * 1).to.equal(1);
+    expect(await itemsContract.balanceOf(user.address, offer.outputCollectionItemIds[1]) * 1).to.equal(1);
   });
 
   it('Should process offer that gives/transfers items', async () => {
@@ -265,14 +265,14 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredCurrencyAmount: itemPrice,
-      givenItemIds: [ 1 ],
+      inputCurrencyAmount: itemPrice,
+      outputCollectionItemIds: [ 1 ],
       canMint: false,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.givenItemIds[0];
+    const itemId = offer.outputCollectionItemIds[0];
 
     await tokenContract.mint(user.address, itemPrice);
     await tokenContract.connect(user).approve(exchangeContract.address, itemPrice);
@@ -292,14 +292,14 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      givenCurrencyAmount: sellPrice,
-      requiredItemIds: [ 1 ],
+      outputCurrencyAmount: sellPrice,
+      inputCollectionItemIds: [ 1 ],
       canMint: true,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.requiredItemIds[0];
+    const itemId = offer.inputCollectionItemIds[0];
 
     await itemsContract.mintToAddress(user.address, itemId, 1);
     await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
@@ -317,14 +317,14 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      givenCurrencyAmount: sellPrice,
-      requiredItemIds: [ 1 ],
+      outputCurrencyAmount: sellPrice,
+      inputCollectionItemIds: [ 1 ],
       canMint: false,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.requiredItemIds[0];
+    const itemId = offer.inputCollectionItemIds[0];
 
     await itemsContract.mintToAddress(user.address, itemId, 1);
     await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
@@ -343,25 +343,25 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredItemIds: [ 1, 2 ],
-      givenItemIds: [ 3 ],
+      inputCollectionItemIds: [ 1, 2 ],
+      outputCollectionItemIds: [ 3 ],
       canMint: true,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const requiredItemIdOne = offer.requiredItemIds[0];
-    const requiredItemIdTwo = offer.requiredItemIds[1];
-    const givenItemId = offer.givenItemIds[0];
+    const inputItemIdOne = offer.inputCollectionItemIds[0];
+    const inputItemIdTwo = offer.inputCollectionItemIds[1];
+    const outputItemId = offer.outputCollectionItemIds[0];
 
-    await itemsContract.mintToAddress(user.address, requiredItemIdOne, 1);
-    await itemsContract.mintToAddress(user.address, requiredItemIdTwo, 1);
+    await itemsContract.mintToAddress(user.address, inputItemIdOne, 1);
+    await itemsContract.mintToAddress(user.address, inputItemIdTwo, 1);
     await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
     await exchangeContract.connect(user).useOffer(offerId);
 
-    expect(await itemsContract.balanceOf(user.address, requiredItemIdOne) * 1).to.equal(0);
-    expect(await itemsContract.balanceOf(user.address, requiredItemIdTwo) * 1).to.equal(0);
-    expect(await itemsContract.balanceOf(user.address, givenItemId) * 1).to.equal(1);
+    expect(await itemsContract.balanceOf(user.address, inputItemIdOne) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(user.address, inputItemIdTwo) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(user.address, outputItemId) * 1).to.equal(1);
     expect((await exchangeContract.offer(offerId)).uses).to.equal(1);
   });
 
@@ -372,10 +372,10 @@ describe('Game_Items_Exchange', () => {
 
     await setOffer({
       offerId,
-      requiredCurrencyAmount: itemPrice,
-      givenItemsCollection: itemsContract.address,
-      givenItemIds: [ itemId ],
-      givenItemAmounts: [ 1 ],
+      inputCurrencyAmount: itemPrice,
+      outputCollection: itemsContract.address,
+      outputCollectionItemIds: [ itemId ],
+      outputCollectionItemAmounts: [ 1 ],
       canMint: true,
     });
 
@@ -398,10 +398,10 @@ describe('Game_Items_Exchange', () => {
 
     await setOffer({
       offerId,
-      requiredItemsCollection: itemsContract.address,
-      requiredItemIds: [ itemId ],
-      requiredItemAmounts: [ 1 ],
-      givenCurrencyAmount: sellPrice,
+      inputCollection: itemsContract.address,
+      inputCollectionItemIds: [ itemId ],
+      inputCollectionItemAmounts: [ 1 ],
+      outputCurrencyAmount: sellPrice,
       canMint: true,
     });
 
@@ -429,14 +429,14 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredCurrencyAmount: itemPrice,
-      givenItemIds: [ 1 ],
+      inputCurrencyAmount: itemPrice,
+      outputCollectionItemIds: [ 1 ],
       canMint: false,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.givenItemIds[0];
+    const itemId = offer.outputCollectionItemIds[0];
 
     await tokenContract.mint(user.address, itemPrice);
     await tokenContract.connect(user).approve(exchangeContract.address, itemPrice);
@@ -449,14 +449,14 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredItemIds: [ 1 ],
-      givenCurrencyAmount: itemPrice,
+      inputCollectionItemIds: [ 1 ],
+      outputCurrencyAmount: itemPrice,
       canMint: false,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.requiredItemIds[0];
+    const itemId = offer.inputCollectionItemIds[0];
 
     await itemsContract.mintToAddress(user.address, itemId, 1);
     await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
@@ -469,18 +469,18 @@ describe('Game_Items_Exchange', () => {
 
     await setOffer({
       offerId,
-      requiredCurrency: tokenContract.address,
-      requiredCurrencyAmount: itemPrice,
-      givenItemsCollection: itemsContract.address,
-      givenItemIds: [ 5 ],
-      givenItemAmounts: [ 1 ],
+      inputCurrency: tokenContract.address,
+      inputCurrencyAmount: itemPrice,
+      outputCollection: itemsContract.address,
+      outputCollectionItemIds: [ 5 ],
+      outputCollectionItemAmounts: [ 1 ],
       canMint: true,
       maxUses: 1,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.givenItemIds[0];
+    const itemId = offer.outputCollectionItemIds[0];
 
     await tokenContract.mint(user.address, itemPrice.mul(2));
     await tokenContract.connect(user).approve(exchangeContract.address, itemPrice.mul(2));
@@ -488,39 +488,39 @@ describe('Game_Items_Exchange', () => {
     await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted; // single use
   });
 
-  it('Fails to use offer when sender does not have enough required token', async () => {
+  it('Fails to use offer when sender does not have enough input token', async () => {
     const itemPrice = getTokenDecimalAmount(10);
     const offerId = 33432;
 
     await setGenericOffer({
       offerId,
-      requiredCurrencyAmount: itemPrice,
-      givenItemIds: [ 1 ],
+      inputCurrencyAmount: itemPrice,
+      outputCollectionItemIds: [ 1 ],
       canMint: false,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.givenItemIds[0];
+    const itemId = offer.outputCollectionItemIds[0];
 
     await tokenContract.connect(user).approve(exchangeContract.address, itemPrice);
     await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted;
   });
 
-  it('Fails to use offer when sender does not have required items', async () => {
+  it('Fails to use offer when sender does not have input items', async () => {
     const itemPrice = getTokenDecimalAmount(15);
     const offerId = 5050;
 
     await setGenericOffer({
       offerId,
-      requiredItemIds: [ 1 ],
-      givenCurrencyAmount: itemPrice,
+      inputCollectionItemIds: [ 1 ],
+      outputCurrencyAmount: itemPrice,
       canMint: false,
     });
 
     const user = otherAddresses[0];
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.requiredItemIds[0];
+    const itemId = offer.inputCollectionItemIds[0];
 
     await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
     await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted;
@@ -532,9 +532,9 @@ describe('Game_Items_Exchange', () => {
     const args = [
       offerId,
       [ ethers.constants.AddressZero, itemsContract.address ],
+      [ [], [ 1 ] ],
+      [ [], [ 1 ] ],
       [ tokenContract.address, ethers.constants.AddressZero ],
-      [ [], [ 1 ] ],
-      [ [], [ 1 ] ],
       [ 0, 0 ],
       0,
     ];
@@ -547,8 +547,8 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredCurrencyAmount: getTokenDecimalAmount(10),
-      givenItemIds: [ 1 ],
+      inputCurrencyAmount: getTokenDecimalAmount(10),
+      outputCollectionItemIds: [ 1 ],
       canMint: false,
     });
 
@@ -627,8 +627,8 @@ describe('Game_Items_Exchange', () => {
 
     await setGenericOffer({
       offerId,
-      requiredCurrencyAmount: itemPrice,
-      givenItemIds: [ 1 ],
+      inputCurrencyAmount: itemPrice,
+      outputCollectionItemIds: [ 1 ],
       canMint: true,
     });
 
@@ -636,7 +636,7 @@ describe('Game_Items_Exchange', () => {
     await tokenContract.connect(sender).approve(exchangeContract.address, itemPrice);
 
     const offer = await exchangeContract.offer(offerId);
-    const itemId = offer.givenItemIds[0];
+    const itemId = offer.outputCollectionItemIds[0];
 
     // create request object
     const data = [ offerId ];
@@ -707,16 +707,16 @@ describe('Game_Items_Exchange', () => {
 
   async function setOffer({
     offerId,
-    requiredItemsCollection = ethers.constants.AddressZero,
-    requiredCurrency = ethers.constants.AddressZero,
-    requiredItemIds = [],
-    requiredItemAmounts = [],
-    requiredCurrencyAmount = 0,
-    givenItemsCollection = ethers.constants.AddressZero,
-    givenCurrency = ethers.constants.AddressZero,
-    givenItemIds = [],
-    givenItemAmounts = [],
-    givenCurrencyAmount = 0,
+    inputCollection = ethers.constants.AddressZero,
+    inputCurrency = ethers.constants.AddressZero,
+    inputCollectionItemIds = [],
+    inputCollectionItemAmounts = [],
+    inputCurrencyAmount = 0,
+    outputCollection = ethers.constants.AddressZero,
+    outputCurrency = ethers.constants.AddressZero,
+    outputCollectionItemIds = [],
+    outputCollectionItemAmounts = [],
+    outputCurrencyAmount = 0,
     maxUses = 0,
     canMint = false
   }) {
@@ -727,36 +727,36 @@ describe('Game_Items_Exchange', () => {
 
     return exchangeContract.setOffer(
       offerId,
-      [ requiredItemsCollection, givenItemsCollection ],
-      [ requiredCurrency, givenCurrency ],
-      [ requiredItemIds, givenItemIds ],
-      [ requiredItemAmounts, givenItemAmounts ],
-      [ requiredCurrencyAmount, givenCurrencyAmount ],
+      [ inputCollection, outputCollection ],
+      [ inputCollectionItemIds, outputCollectionItemIds ],
+      [ inputCollectionItemAmounts, outputCollectionItemAmounts ],
+      [ inputCurrency, outputCurrency ],
+      [ inputCurrencyAmount, outputCurrencyAmount ],
       maxUses,
     );
   }
 
   async function setGenericOffer({
     offerId,
-    requiredItemIds,
-    requiredCurrencyAmount,
-    givenItemIds,
-    givenCurrencyAmount,
+    inputCollectionItemIds,
+    inputCurrencyAmount,
+    outputCollectionItemIds,
+    outputCurrencyAmount,
     maxUses,
     canMint,
   }) {
     return setOffer({
       offerId,
-      requiredItemsCollection: requiredItemIds ? itemsContract.address : undefined,
-      requiredCurrency: requiredCurrencyAmount ? tokenContract.address : undefined,
-      requiredItemIds,
-      requiredItemAmounts: requiredItemIds ? requiredItemIds.map(() => 1) : [],
-      requiredCurrencyAmount,
-      givenItemsCollection: givenItemIds ? itemsContract.address : undefined,
-      givenCurrency: givenCurrencyAmount ? tokenContract.address : undefined,
-      givenItemIds,
-      givenItemAmounts: givenItemIds ? givenItemIds.map(() => 1) : [],
-      givenCurrencyAmount,
+      inputCollection: inputCollectionItemIds ? itemsContract.address : undefined,
+      inputCurrency: inputCurrencyAmount ? tokenContract.address : undefined,
+      inputCollectionItemIds,
+      inputCollectionItemAmounts: inputCollectionItemIds ? inputCollectionItemIds.map(() => 1) : [],
+      inputCurrencyAmount,
+      outputCollection: outputCollectionItemIds ? itemsContract.address : undefined,
+      outputCurrency: outputCurrencyAmount ? tokenContract.address : undefined,
+      outputCollectionItemIds,
+      outputCollectionItemAmounts: outputCollectionItemIds ? outputCollectionItemIds.map(() => 1) : [],
+      outputCurrencyAmount,
       maxUses,
       canMint,
     });
