@@ -23,5 +23,6 @@ const recurseContracts = rootDirectory => {
 }
 
 recurseContracts(path.join(__dirname, './artifacts/contracts'));
+recurseContracts(path.join(__dirname, './artifacts/@openzeppelin'));
 
 module.exports = contracts;
