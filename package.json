@@ -2,7 +2,7 @@
   "name": "metafab-contracts",
   "description": "Template contracts deployed by MetaFab.",
   "homepage": "https://trymetafab.com",
-  "version": "0.3.32",
+  "version": "0.4.4",
   "scripts": {
     "test": "npx hardhat test"
   },

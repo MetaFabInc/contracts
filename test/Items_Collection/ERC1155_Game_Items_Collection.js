@@ -330,7 +330,7 @@ describe('ERC1155_Game_Items_Collection', () => {
 
   it('Should set item transfer timelock and properly return bool for isItemTransferrable', async () => {
     const itemId = 0;
-    const unlockTimestamp = Math.floor(Date.now() / 1000) + 300; // 5 min from now
+    const unlockTimestamp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
 
     expect(await itemsContract.isItemTransferrable(itemId)).to.equal(true);
 
@@ -343,7 +343,7 @@ describe('ERC1155_Game_Items_Collection', () => {
     const recipient = otherAddresses[2];
     const itemId = 0;
     const quantity = 10;
-    const unlockTimestamp = Math.floor(Date.now() / 1000) + 300; // 5 min from now
+    const unlockTimestamp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
 
     await itemsContract.setItemTransferTimelock(itemId, unlockTimestamp);
 
@@ -405,7 +405,7 @@ describe('ERC1155_Game_Items_Collection', () => {
     for (let i = 0; i < 50; i++) {
       await mintItemToAddress(owner.address, Math.floor((Math.random() * 10000)), 1);
     }
-
+    await new Promise(resolve => setTimeout(resolve, 500)); // local chain can lag
     const allBalances = await itemsContract.balanceOfAll(owner.address);
 
     expect(allBalances.length).to.equal(50);
