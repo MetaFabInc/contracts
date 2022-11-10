@@ -17,17 +17,23 @@ module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
     homestead: {
-      url: 'https://eth-mainnet.g.alchemy.com/v2/hB_gCVHrVyoAiZ1KZG3VOYqKwKPTDufq',
+      url: '',
     },
     goerli: {
-      url: 'https://eth-goerli.g.alchemy.com/v2/CvXofzR_0SRA5dSgs3yIpP_-REkVezLu',
+      url: '',
     },
     polygon: {
       url: 'https://polygon-rpc.com',
     },
     polygonMumbai: {
-      url: 'https://polygon-mumbai.g.alchemy.com/v2/3QB9cs5_rdddFKYwFc0M-hzydnS6lhs6',
+      url: '',
     },
+    arbitrum: {
+      url: '',
+    },
+    arbitrumGoerli: {
+      url: '',
+    }
   },
   abiExporter: {
     path: './abi',
