@@ -123,8 +123,6 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
   }
 
   function updateChildChainManager(address _childChainManagerProxy) external onlyRole(OWNER_ROLE) {
-    require(_childChainManagerProxy != address(0), "Bad ChildChainManagerProxy address.");
-
     childChainManagerProxy = _childChainManagerProxy;
   }
 
