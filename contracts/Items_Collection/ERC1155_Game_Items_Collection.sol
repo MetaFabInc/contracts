@@ -47,6 +47,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
 
   function setItemURI(uint256 _itemId, string memory _uri) external onlyRole(OWNER_ROLE) {
     itemURIs[_itemId] = _uri;
+    setItemIdExists(_itemId);
   }
 
   function isItemTransferrable(uint256 _itemId) public view returns (bool) {
@@ -217,11 +218,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
       );
 
       if (from == address(0)) {
-        if (!itemExists[id]) {
-          itemIds.push(id); // set, so only adds if unique
-          itemExists[id] = true;
-        }
-
+        setItemIdExists(id);
         itemSupplies[id] += amounts[i];
       }
 
@@ -239,6 +236,17 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, IERC165, AccessControl) returns (bool) {
     return interfaceId == type(IERC1155_Game_Items_Collection).interfaceId || super.supportsInterface(interfaceId);
+  }
+
+  /**
+   * @dev Helpers
+   */
+
+  function setItemIdExists(uint256 _id) private {
+    if (!itemExists[_id]) {
+      itemIds.push(_id); // set, so only adds if unique
+      itemExists[_id] = true;
+    }
   }
 
   /**

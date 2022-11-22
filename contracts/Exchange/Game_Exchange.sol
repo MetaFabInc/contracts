@@ -136,8 +136,8 @@ contract Game_Exchange is IGame_Exchange, ERC2771Context_Upgradeable, Roles, Acc
     uint256[2] calldata _inputOutputCurrencyAmounts,          // 0: inputCurrencyAmounts, 1: outputCurrencyAmounts
     uint256 _maxUses
   ) external onlyRole(OWNER_ROLE) {
-    require(_inputOutputCollectionItemIds[0].length == _inputOutputCollectionItemAmounts[0].length, "");
-    require(_inputOutputCollectionItemIds[1].length == _inputOutputCollectionItemAmounts[1].length, "");
+    require(_inputOutputCollectionItemIds[0].length == _inputOutputCollectionItemAmounts[0].length, "Input items and amounts mismatched");
+    require(_inputOutputCollectionItemIds[1].length == _inputOutputCollectionItemAmounts[1].length, "Output items and amounts mismatched");
 
     Offer memory offerSet = Offer({
       id: _offerId,
@@ -179,7 +179,7 @@ contract Game_Exchange is IGame_Exchange, ERC2771Context_Upgradeable, Roles, Acc
     require(offerUsed.maxUses == 0 || offerUsed.uses < offerUsed.maxUses, "Offer has reached max uses.");
 
     if (address(offerUsed.inputCollection) != address(0)) {
-        offerUsed.inputCollection.safeBatchTransferFrom(_msgSender(), address(this), offerUsed.inputCollectionItemIds, offerUsed.inputCollectionItemAmounts, "");
+      offerUsed.inputCollection.safeBatchTransferFrom(_msgSender(), address(this), offerUsed.inputCollectionItemIds, offerUsed.inputCollectionItemAmounts, "");
     }
 
     if (offerUsed.inputCurrencyAmount > 0) {
