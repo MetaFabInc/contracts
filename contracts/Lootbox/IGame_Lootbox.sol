@@ -25,6 +25,7 @@ interface IGame_Lootbox  {
     uint256[] outputCollectionItemIds;
     uint256[] outputCollectionItemAmounts;
     uint256[] outputCollectionItemWeights;
+    uint256 outputTotalItemsWeight;
     uint256 outputTotalItems;
 
     uint256 opens;

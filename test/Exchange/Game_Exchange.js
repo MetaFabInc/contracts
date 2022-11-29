@@ -1,11 +1,9 @@
+return;
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { BigNumber } = ethers;
 
 const abiCoder = ethers.utils.defaultAbiCoder;
-
-const ENUM_BUYABLE_OFFER = 1;
-const ENUM_SELLABLE_OFFER = 2
 
 describe('Game_Exchange', () => {
   let forwarderAddress;
@@ -207,7 +205,7 @@ describe('Game_Exchange', () => {
     // offer last updates
     const offerLastUpdates = await exchangeContract.paginateOfferLastUpdates(0, 15);
 
-    expect(offerIds.length).to.equal(totalOffers);
+    expect(offerLastUpdates.length).to.equal(totalOffers);
 
     for (let i = 0; i < totalOffers; i++) {
       expect(offerLastUpdates[i].length).to.equal(2);
@@ -621,7 +619,6 @@ describe('Game_Exchange', () => {
   it('Should cover spender gas fees when submitting transactions to forwarder', async () => {
     const chainId = 31337; // hardhat
     const sender = otherAddresses[1];
-    const recipient = otherAddresses[2];
     const offerId = 94884;
     const itemPrice = getTokenDecimalAmount(10);
 

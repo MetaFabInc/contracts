@@ -12,18 +12,19 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "./IGame_Lootbox.sol";
 import "../Currency/IERC20_Game_Currency.sol";
 import "../Items_Collection/IERC1155_Game_Items_Collection.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
 
-contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, Roles, AccessControl, ReentrancyGuard {
+contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, ERC1155Holder, Roles, AccessControl, ReentrancyGuard {
   using EnumerableSet for EnumerableSet.UintSet;
 
   EnumerableSet.UintSet private lootboxIds;
   mapping(uint256 => Lootbox) private lootboxes;
-  mapping(address => mapping(uint256 => OpenedLootbox[])) private openedLootboxes; // addr -> lootboxId -> openedLootbox[]
+  mapping(address => mapping(uint256 => OpenedLootbox[])) private openedLootboxes; // addr -> lootboxId -> OpenedLootbox[]
   uint256 claimableBlockOffset = 1;
 
   constructor(address _forwarder)
@@ -177,8 +178,14 @@ contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, Roles, Acces
     uint256[] calldata _outputCollectionItemWeights,
     uint256 _outputTotalItems
   ) external onlyRole(OWNER_ROLE) {
-    require(_inputOutputCollectionItemIds[0].length == _inputOutputCollectionItemAmounts[0].length, "");
-    require(_inputOutputCollectionItemIds[1].length == _inputOutputCollectionItemAmounts[1].length, "");
+    require(_inputOutputCollectionItemIds[0].length == _inputOutputCollectionItemAmounts[0].length, "Mismatched input item ids and amount lengths.");
+    require(_inputOutputCollectionItemIds[1].length == _inputOutputCollectionItemAmounts[1].length, "Mismatched output item ids and amount length.");
+    require(_inputOutputCollectionItemIds[1].length == _outputCollectionItemWeights.length, "Mismatch output item ids and item weights length.");
+
+    uint256 outputTotalItemsWeight = 0;
+    for (uint256 i = 0; i < _outputCollectionItemWeights.length; i++) {
+      outputTotalItemsWeight += _outputCollectionItemWeights[i];
+    }
 
     Lootbox memory lootboxSet = Lootbox({
       id: _lootboxId,
@@ -189,6 +196,7 @@ contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, Roles, Acces
       outputCollectionItemIds: _inputOutputCollectionItemIds[1],
       outputCollectionItemAmounts: _inputOutputCollectionItemAmounts[1],
       outputCollectionItemWeights: _outputCollectionItemWeights,
+      outputTotalItemsWeight: outputTotalItemsWeight,
       outputTotalItems: _outputTotalItems,
       opens: lootboxes[_lootboxId].opens,
       lastUpdatedAt: block.timestamp
@@ -244,21 +252,25 @@ contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, Roles, Acces
   }
 
   function claimLootbox(uint256 _lootboxId, uint256 _openedLootboxIndex) external nonReentrant {
-    _claimLootbox(_lootboxId, _openedLootboxIndex);
+    _claimLootbox(_lootboxId, _openedLootboxIndex, true);
   }
 
   function claimLootboxes(uint256 _lootboxId) external nonReentrant {
     for (uint256 i = 0; i < openedLootboxes[_msgSender()][_lootboxId].length; i++) {
-      _claimLootbox(_lootboxId, i);
+      _claimLootbox(_lootboxId, i, false);
     }
   }
 
-  function _claimLootbox(uint256 _lootboxId, uint256 _openedLootboxIndex) private {
+  function _claimLootbox(uint256 _lootboxId, uint256 _openedLootboxIndex, bool _revertUnclaimable) private {
     OpenedLootbox storage lootboxOpened = openedLootboxes[_msgSender()][_lootboxId][_openedLootboxIndex];
     Lootbox storage lootboxClaimed = lootboxes[_lootboxId];
 
     if (block.number < lootboxOpened.claimSeedBlock || lootboxOpened.claimed) {
-      return;
+      if (_revertUnclaimable) {
+        revert("Lootbox unclaimable. Claim block not reached or already claimed.");
+      } else {
+        return;
+      }
     }
 
     // Pick randomized items
@@ -267,13 +279,7 @@ contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, Roles, Acces
 
     for (uint256 i = 0; i < lootboxClaimed.outputTotalItems; i++) {
       uint256 randomSeed = uint256(keccak256(abi.encodePacked(blockhash(lootboxOpened.claimSeedBlock - 1), _msgSender(), _openedLootboxIndex, i)));
-      uint256 totalWeight = 0;
-
-      for (uint256 j = 0; j < lootboxClaimed.outputCollectionItemWeights.length; j++) {
-        totalWeight += lootboxClaimed.outputCollectionItemWeights[j];
-      }
-
-      uint256 randomWeight = randomSeed % totalWeight;
+      uint256 randomWeight = randomSeed % lootboxClaimed.outputTotalItemsWeight;
 
       for (uint256 j = 0; j < lootboxClaimed.outputCollectionItemWeights.length; j++) {
         uint256 indexWeight = lootboxClaimed.outputCollectionItemWeights[j];
@@ -305,6 +311,8 @@ contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, Roles, Acces
       );
     }
 
+    lootboxOpened.outputCollectionItemIds = outputCollectionItemIds;
+    lootboxOpened.outputCollectionItemAmounts = outputCollectionItemAmounts;
     lootboxOpened.claimed = true;
 
     emit LootboxClaimed(_lootboxId, lootboxClaimed, _msgSender(), _openedLootboxIndex, outputCollectionItemIds, outputCollectionItemAmounts);
@@ -341,7 +349,10 @@ contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, Roles, Acces
    * @dev ERC165
    */
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl) returns (bool) {
-    return interfaceId == type(IGame_Lootbox).interfaceId || super.supportsInterface(interfaceId);
+  function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC1155Receiver) returns (bool) {
+    return
+      interfaceId == type(IGame_Lootbox).interfaceId ||
+      interfaceId == type(IERC1155Receiver).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 }
