@@ -4,12 +4,12 @@ const { BigNumber } = ethers;
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 
-describe('Game_Exchange', () => {
+describe('Game_Shop', () => {
   let forwarderAddress;
   let forwarderContract;
   let tokenContract;
   let itemsContract;
-  let exchangeContract;
+  let shopContract;
   let owner;
   let otherAddresses;
 
@@ -19,7 +19,7 @@ describe('Game_Exchange', () => {
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
     const ERC20_Game_Currency = await ethers.getContractFactory('ERC20_Game_Currency');
     const ERC1155_Game_Items_Collection = await ethers.getContractFactory('ERC1155_Game_Items_Collection');
-    const Game_Exchange = await ethers.getContractFactory('Game_Exchange');
+    const Game_Shop = await ethers.getContractFactory('Game_Shop');
 
     owner = _owner;
     otherAddresses = _otherAddresses;
@@ -36,7 +36,7 @@ describe('Game_Exchange', () => {
 
     itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress);
 
-    exchangeContract = await Game_Exchange.deploy(forwarderAddress);
+    shopContract = await Game_Shop.deploy(forwarderAddress);
   });
 
   /*
@@ -47,7 +47,7 @@ describe('Game_Exchange', () => {
     await forwarderContract.deployed();
     await tokenContract.deployed();
     await itemsContract.deployed();
-    await exchangeContract.deployed();
+    await shopContract.deployed();
   });
 
   /*
@@ -70,7 +70,7 @@ describe('Game_Exchange', () => {
       canMint: true,
     });
 
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
 
     expect(offer.id * 1).to.equal(offerId);
     expect(offer.inputCurrencyAmount * 1).to.equal(inputCurrencyAmount * 1);
@@ -105,7 +105,7 @@ describe('Game_Exchange', () => {
       canMint: true,
     });
 
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
 
     expect(offer.id * 1).to.equal(offerId);
     expect(offer.outputCurrencyAmount * 1).to.equal(outputCurrencyAmount * 1);
@@ -142,7 +142,7 @@ describe('Game_Exchange', () => {
       canMint: true,
     });
 
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
 
     expect(offer.id * 1).to.equal(offerId);
     expect(offer.uses * 1).to.equal(0);
@@ -183,7 +183,7 @@ describe('Game_Exchange', () => {
     }
 
     await new Promise(resolve => setTimeout(resolve, 500)); // wait
-    const offers = await exchangeContract.paginateOffers(0, 15); // pagination should not overflow, 15 used to test
+    const offers = await shopContract.paginateOffers(0, 15); // pagination should not overflow, 15 used to test
 
     // offers
     expect(offers.length).to.equal(totalOffers);
@@ -193,7 +193,7 @@ describe('Game_Exchange', () => {
     }
 
     // offer ids
-    const offerIds = await exchangeContract.paginateOfferIds(0, 15);
+    const offerIds = await shopContract.paginateOfferIds(0, 15);
 
     expect(offerIds.length).to.equal(totalOffers);
 
@@ -202,7 +202,7 @@ describe('Game_Exchange', () => {
     }
 
     // offer last updates
-    const offerLastUpdates = await exchangeContract.paginateOfferLastUpdates(0, 15);
+    const offerLastUpdates = await shopContract.paginateOfferLastUpdates(0, 15);
 
     expect(offerLastUpdates.length).to.equal(totalOffers);
 
@@ -221,13 +221,13 @@ describe('Game_Exchange', () => {
       canMint: true,
     });
 
-    expect((await exchangeContract.offer(offerId)).id * 1).to.equal(offerId);
+    expect((await shopContract.offer(offerId)).id * 1).to.equal(offerId);
 
-    await exchangeContract.removeOffer(offerId);
+    await shopContract.removeOffer(offerId);
 
-    expect(await exchangeContract.totalOffers() * 1).to.equal(0)
+    expect(await shopContract.totalOffers() * 1).to.equal(0)
 
-    await expect(exchangeContract.offer(offerId)).to.be.reverted;
+    await expect(shopContract.offer(offerId)).to.be.reverted;
   });
 
   it('Should process offer that requires currency and give/mints items and increment uses', async () => {
@@ -243,15 +243,15 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
 
     await tokenContract.mint(user.address, itemPrice);
-    await tokenContract.connect(user).approve(exchangeContract.address, itemPrice);
-    await exchangeContract.connect(user).useOffer(offerId);
+    await tokenContract.connect(user).approve(shopContract.address, itemPrice);
+    await shopContract.connect(user).useOffer(offerId);
 
     expect(await tokenContract.balanceOf(user.address) * 1).to.equal(0);
-    expect(await tokenContract.balanceOf(exchangeContract.address) * 1).to.equal(itemPrice * 1);
-    expect((await exchangeContract.offer(offerId)).uses).to.equal(1);
+    expect(await tokenContract.balanceOf(shopContract.address) * 1).to.equal(itemPrice * 1);
+    expect((await shopContract.offer(offerId)).uses).to.equal(1);
     expect(await itemsContract.balanceOf(user.address, offer.outputCollectionItemIds[0]) * 1).to.equal(1);
     expect(await itemsContract.balanceOf(user.address, offer.outputCollectionItemIds[1]) * 1).to.equal(1);
   });
@@ -268,19 +268,19 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.outputCollectionItemIds[0];
 
     await tokenContract.mint(user.address, itemPrice);
-    await tokenContract.connect(user).approve(exchangeContract.address, itemPrice);
-    await itemsContract.mintToAddress(exchangeContract.address, itemId, 1);
-    await exchangeContract.connect(user).useOffer(offerId);
+    await tokenContract.connect(user).approve(shopContract.address, itemPrice);
+    await itemsContract.mintToAddress(shopContract.address, itemId, 1);
+    await shopContract.connect(user).useOffer(offerId);
 
     expect(await tokenContract.balanceOf(user.address) * 1).to.equal(0);
-    expect(await tokenContract.balanceOf(exchangeContract.address) * 1).to.equal(itemPrice * 1);
+    expect(await tokenContract.balanceOf(shopContract.address) * 1).to.equal(itemPrice * 1);
     expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(1);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemId) * 1).to.equal(0);
-    expect((await exchangeContract.offer(offerId)).uses).to.equal(1);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(0);
+    expect((await shopContract.offer(offerId)).uses).to.equal(1);
   });
 
   it('Should process offer that requires items and mints/gives currency and increment uses', async () => {
@@ -295,16 +295,16 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.inputCollectionItemIds[0];
 
     await itemsContract.mintToAddress(user.address, itemId, 1);
-    await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
-    await exchangeContract.connect(user).useOffer(offerId);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await shopContract.connect(user).useOffer(offerId);
 
     expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(0);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemId) * 1).to.equal(1);
-    expect((await exchangeContract.offer(offerId)).uses).to.equal(1);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(1);
+    expect((await shopContract.offer(offerId)).uses).to.equal(1);
     expect(await tokenContract.balanceOf(user.address) * 1).to.equal(sellPrice * 1);
   });
 
@@ -320,19 +320,19 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.inputCollectionItemIds[0];
 
     await itemsContract.mintToAddress(user.address, itemId, 1);
-    await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
-    await tokenContract.mint(exchangeContract.address, sellPrice);
-    await exchangeContract.connect(user).useOffer(offerId);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await tokenContract.mint(shopContract.address, sellPrice);
+    await shopContract.connect(user).useOffer(offerId);
 
     expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(0);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemId) * 1).to.equal(1);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(1);
     expect(await tokenContract.balanceOf(user.address) * 1).to.equal(sellPrice * 1);
-    expect(await tokenContract.balanceOf(exchangeContract.address) * 1).to.equal(0);
-    expect((await exchangeContract.offer(offerId)).uses).to.equal(1);
+    expect(await tokenContract.balanceOf(shopContract.address) * 1).to.equal(0);
+    expect((await shopContract.offer(offerId)).uses).to.equal(1);
   });
 
   it('Should process offer that requires items and mints/gives items', async () => {
@@ -346,20 +346,20 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const inputItemIdOne = offer.inputCollectionItemIds[0];
     const inputItemIdTwo = offer.inputCollectionItemIds[1];
     const outputItemId = offer.outputCollectionItemIds[0];
 
     await itemsContract.mintToAddress(user.address, inputItemIdOne, 1);
     await itemsContract.mintToAddress(user.address, inputItemIdTwo, 1);
-    await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
-    await exchangeContract.connect(user).useOffer(offerId);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await shopContract.connect(user).useOffer(offerId);
 
     expect(await itemsContract.balanceOf(user.address, inputItemIdOne) * 1).to.equal(0);
     expect(await itemsContract.balanceOf(user.address, inputItemIdTwo) * 1).to.equal(0);
     expect(await itemsContract.balanceOf(user.address, outputItemId) * 1).to.equal(1);
-    expect((await exchangeContract.offer(offerId)).uses).to.equal(1);
+    expect((await shopContract.offer(offerId)).uses).to.equal(1);
   });
 
   it('Should process offer requiring native chain token', async () => {
@@ -379,12 +379,12 @@ describe('Game_Exchange', () => {
     const user = otherAddresses[0];
     const userStartBalance = await user.getBalance() * 1; // 10000~
 
-    await exchangeContract.connect(user).useOffer(offerId, {
+    await shopContract.connect(user).useOffer(offerId, {
       value: itemPrice,
     });
 
     expect(await user.getBalance() * 1).to.be.below(userStartBalance - itemPrice * 1); // less price + gas
-    expect(await user.provider.getBalance(exchangeContract.address) * 1).to.equal(itemPrice * 1);
+    expect(await user.provider.getBalance(shopContract.address) * 1).to.equal(itemPrice * 1);
     expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(1);
   });
 
@@ -407,17 +407,17 @@ describe('Game_Exchange', () => {
 
     // fund merchant
     await owner.sendTransaction({
-      to: exchangeContract.address,
+      to: shopContract.address,
       value: ethers.utils.parseEther('2.0'),
     });
 
     await itemsContract.mintToAddress(user.address, itemId, 1);
-    await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
-    await exchangeContract.connect(user).useOffer(offerId);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await shopContract.connect(user).useOffer(offerId);
 
     expect(await user.getBalance() * 1).to.be.above(userStartBalance);
-    expect(await user.provider.getBalance(exchangeContract.address) * 1).to.equal(0);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemId) * 1).to.equal(1);
+    expect(await user.provider.getBalance(shopContract.address) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(1);
   });
 
   it('Fails to use offer when not approved to mint items and merchant does not own items to fulfill', async () => {
@@ -432,12 +432,12 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.outputCollectionItemIds[0];
 
     await tokenContract.mint(user.address, itemPrice);
-    await tokenContract.connect(user).approve(exchangeContract.address, itemPrice);
-    await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted;
+    await tokenContract.connect(user).approve(shopContract.address, itemPrice);
+    await expect(shopContract.connect(user).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to use offer when not approved to mint currency and merchant does not own tokens to fulfill', async () => {
@@ -452,12 +452,12 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.inputCollectionItemIds[0];
 
     await itemsContract.mintToAddress(user.address, itemId, 1);
-    await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
-    await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted;
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await expect(shopContract.connect(user).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to use offer when max uses have been reached', async () => {
@@ -476,13 +476,13 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.outputCollectionItemIds[0];
 
     await tokenContract.mint(user.address, itemPrice.mul(2));
-    await tokenContract.connect(user).approve(exchangeContract.address, itemPrice.mul(2));
-    await exchangeContract.connect(user).useOffer(offerId);
-    await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted; // single use
+    await tokenContract.connect(user).approve(shopContract.address, itemPrice.mul(2));
+    await shopContract.connect(user).useOffer(offerId);
+    await expect(shopContract.connect(user).useOffer(offerId)).to.be.reverted; // single use
   });
 
   it('Fails to use offer when sender does not have enough input token', async () => {
@@ -497,11 +497,11 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.outputCollectionItemIds[0];
 
-    await tokenContract.connect(user).approve(exchangeContract.address, itemPrice);
-    await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted;
+    await tokenContract.connect(user).approve(shopContract.address, itemPrice);
+    await expect(shopContract.connect(user).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to use offer when sender does not have input items', async () => {
@@ -516,11 +516,11 @@ describe('Game_Exchange', () => {
     });
 
     const user = otherAddresses[0];
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.inputCollectionItemIds[0];
 
-    await itemsContract.connect(user).setApprovalForAll(exchangeContract.address, true);
-    await expect(exchangeContract.connect(user).useOffer(offerId)).to.be.reverted;
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await expect(shopContract.connect(user).useOffer(offerId)).to.be.reverted;
   });
 
   it('Fails to set buyable and sellable offers when not owner', async () => {
@@ -536,7 +536,7 @@ describe('Game_Exchange', () => {
       0,
     ];
 
-    await expect(exchangeContract.connect(otherAddresses[0]).setOffer(...args)).to.be.reverted;
+    await expect(shopContract.connect(otherAddresses[0]).setOffer(...args)).to.be.reverted;
   });
 
   it('Fails to remove offers when not owner', async () => {
@@ -549,7 +549,7 @@ describe('Game_Exchange', () => {
       canMint: false,
     });
 
-    await expect(exchangeContract.connect(otherAddresses[0]).removeOffer(offerId)).to.be.reverted;
+    await expect(shopContract.connect(otherAddresses[0]).removeOffer(offerId)).to.be.reverted;
   });
 
   /*
@@ -561,54 +561,54 @@ describe('Game_Exchange', () => {
     const ownerStartBalance = await owner.getBalance();
 
     await otherAddresses[0].sendTransaction({
-      to: exchangeContract.address,
+      to: shopContract.address,
       value: depositAmount,
     });
 
-    expect(await owner.provider.getBalance(exchangeContract.address) * 1).to.equal(depositAmount * 1);
+    expect(await owner.provider.getBalance(shopContract.address) * 1).to.equal(depositAmount * 1);
 
-    await exchangeContract.withdrawTo(owner.address);
+    await shopContract.withdrawTo(owner.address);
 
-    expect(await owner.provider.getBalance(exchangeContract.address) * 1).to.equal(0);
+    expect(await owner.provider.getBalance(shopContract.address) * 1).to.equal(0);
     expect(await owner.getBalance() * 1).to.be.above(ownerStartBalance * 1);
   });
 
   it('Should withdraw erc20 currency tokens', async () => {
     const depositAmount = getTokenDecimalAmount(175);
 
-    await tokenContract.mint(exchangeContract.address, depositAmount);
-    expect(await tokenContract.balanceOf(exchangeContract.address) * 1).to.equal(depositAmount * 1);
-    await exchangeContract.withdrawCurrencyTo(tokenContract.address, owner.address);
-    expect(await tokenContract.balanceOf(exchangeContract.address) * 1).to.equal(0);
+    await tokenContract.mint(shopContract.address, depositAmount);
+    expect(await tokenContract.balanceOf(shopContract.address) * 1).to.equal(depositAmount * 1);
+    await shopContract.withdrawCurrencyTo(tokenContract.address, owner.address);
+    expect(await tokenContract.balanceOf(shopContract.address) * 1).to.equal(0);
     expect(await tokenContract.balanceOf(owner.address) * 1).to.equal(depositAmount * 1);
   });
 
   it('Should withdraw erc1155 items', async () => {
     const itemIds = [ 3, 4 ];
 
-    await itemsContract.mintBatchToAddress(exchangeContract.address, itemIds, [ 1, 1 ]);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemIds[0])).to.equal(1);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemIds[1])).to.equal(1);
-    await exchangeContract.withdrawItemsTo(itemsContract.address, itemIds, owner.address);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemIds[0])).to.equal(0);
-    expect(await itemsContract.balanceOf(exchangeContract.address, itemIds[1])).to.equal(0);
+    await itemsContract.mintBatchToAddress(shopContract.address, itemIds, [ 1, 1 ]);
+    expect(await itemsContract.balanceOf(shopContract.address, itemIds[0])).to.equal(1);
+    expect(await itemsContract.balanceOf(shopContract.address, itemIds[1])).to.equal(1);
+    await shopContract.withdrawItemsTo(itemsContract.address, itemIds, owner.address);
+    expect(await itemsContract.balanceOf(shopContract.address, itemIds[0])).to.equal(0);
+    expect(await itemsContract.balanceOf(shopContract.address, itemIds[1])).to.equal(0);
     expect(await itemsContract.balanceOf(owner.address, itemIds[0])).to.equal(1);
     expect(await itemsContract.balanceOf(owner.address, itemIds[1])).to.equal(1);
   });
 
   it('Fails to withdraw when not owner', async () => {
     await otherAddresses[0].sendTransaction({
-      to: exchangeContract.address,
+      to: shopContract.address,
       value: getTokenDecimalAmount(100),
     });
 
-    await tokenContract.mint(exchangeContract.address, getTokenDecimalAmount(175));
+    await tokenContract.mint(shopContract.address, getTokenDecimalAmount(175));
 
-    await itemsContract.mintBatchToAddress(exchangeContract.address, [ 3 ], [ 1 ]);
+    await itemsContract.mintBatchToAddress(shopContract.address, [ 3 ], [ 1 ]);
 
-    await expect(exchangeContract.connect(otherAddresses[0]).withdrawTo(owner.address)).to.be.reverted;
-    await expect(exchangeContract.connect(otherAddresses[0]).withdrawCurrencyTo(tokenContract.address, owner.address)).to.be.reverted;
-    await expect(exchangeContract.connect(otherAddresses[0]).withdrawItemsTo(itemsContract.address, [ 3 ], owner.address)).to.be.reverted;
+    await expect(shopContract.connect(otherAddresses[0]).withdrawTo(owner.address)).to.be.reverted;
+    await expect(shopContract.connect(otherAddresses[0]).withdrawCurrencyTo(tokenContract.address, owner.address)).to.be.reverted;
+    await expect(shopContract.connect(otherAddresses[0]).withdrawItemsTo(itemsContract.address, [ 3 ], owner.address)).to.be.reverted;
   });
 
   /*
@@ -629,18 +629,18 @@ describe('Game_Exchange', () => {
     });
 
     await tokenContract.mint(sender.address, itemPrice);
-    await tokenContract.connect(sender).approve(exchangeContract.address, itemPrice);
+    await tokenContract.connect(sender).approve(shopContract.address, itemPrice);
 
-    const offer = await exchangeContract.offer(offerId);
+    const offer = await shopContract.offer(offerId);
     const itemId = offer.outputCollectionItemIds[0];
 
     // create request object
     const data = [ offerId ];
-    const gasEstimate = await exchangeContract.connect(sender).estimateGas.useOffer(offerId);
-    const callData = exchangeContract.interface.encodeFunctionData('useOffer', data);
+    const gasEstimate = await shopContract.connect(sender).estimateGas.useOffer(offerId);
+    const callData = shopContract.interface.encodeFunctionData('useOffer', data);
     const forwardRequest = {
       from: sender.address,
-      to: exchangeContract.address,
+      to: shopContract.address,
       value: getTokenDecimalAmount(0),
       gas: gasEstimate,
       nonce: 41,
@@ -687,12 +687,12 @@ describe('Game_Exchange', () => {
   });
 
   it('Should properly upgrade trusted forwarder', async () => {
-    await exchangeContract.upgradeTrustedForwarder(otherAddresses[1].address);
-    expect(await exchangeContract.isTrustedForwarder(otherAddresses[1].address)).to.equal(true);
+    await shopContract.upgradeTrustedForwarder(otherAddresses[1].address);
+    expect(await shopContract.isTrustedForwarder(otherAddresses[1].address)).to.equal(true);
   });
 
   it('Fails to upgrade trusted forwarder if not owner', async () => {
-    await expect(exchangeContract.connect(otherAddresses[0]).upgradeTrustedForwarder(
+    await expect(shopContract.connect(otherAddresses[0]).upgradeTrustedForwarder(
       otherAddresses[1].address,
     )).to.be.reverted;
   });
@@ -717,11 +717,11 @@ describe('Game_Exchange', () => {
     canMint = false
   }) {
     if (canMint) {
-      await itemsContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), exchangeContract.address);
-      await tokenContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), exchangeContract.address);
+      await itemsContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), shopContract.address);
+      await tokenContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), shopContract.address);
     }
 
-    return exchangeContract.setOffer(
+    return shopContract.setOffer(
       offerId,
       [ inputCollection, outputCollection ],
       [ inputCollectionItemIds, outputCollectionItemIds ],

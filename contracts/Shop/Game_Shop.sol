@@ -13,13 +13,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "./IGame_Exchange.sol";
+import "./IGame_Shop.sol";
 import "../Currency/IERC20_Game_Currency.sol";
 import "../Items_Collection/IERC1155_Game_Items_Collection.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
 
-contract Game_Exchange is IGame_Exchange, ERC2771Context_Upgradeable, Roles, AccessControl, ReentrancyGuard, ERC1155Holder {
+contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, AccessControl, ReentrancyGuard, ERC1155Holder {
   using EnumerableSet for EnumerableSet.UintSet;
 
   EnumerableSet.UintSet private offerIds;
@@ -191,7 +191,7 @@ contract Game_Exchange is IGame_Exchange, ERC2771Context_Upgradeable, Roles, Acc
     }
 
     if (address(offerUsed.outputCollection) != address(0)) {
-      if (_exchangeCanMint(address(offerUsed.outputCollection))) {
+      if (_shopCanMint(address(offerUsed.outputCollection))) {
         IERC1155_Game_Items_Collection gameItemsCollection = IERC1155_Game_Items_Collection(address(offerUsed.outputCollection));
         gameItemsCollection.mintBatchToAddress(_msgSender(), offerUsed.outputCollectionItemIds, offerUsed.outputCollectionItemAmounts);
       } else {
@@ -200,7 +200,7 @@ contract Game_Exchange is IGame_Exchange, ERC2771Context_Upgradeable, Roles, Acc
     }
 
     if (address(offerUsed.outputCurrency) != address(0)) {
-      if (_exchangeCanMint(address(offerUsed.outputCurrency))) {
+      if (_shopCanMint(address(offerUsed.outputCurrency))) {
         IERC20_Game_Currency gameCurrency = IERC20_Game_Currency(address(offerUsed.outputCurrency));
         gameCurrency.mint(_msgSender(), offerUsed.outputCurrencyAmount);
       } else {
@@ -268,7 +268,7 @@ contract Game_Exchange is IGame_Exchange, ERC2771Context_Upgradeable, Roles, Acc
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC1155Receiver) returns (bool) {
     return
-      interfaceId == type(IGame_Exchange).interfaceId ||
+      interfaceId == type(IGame_Shop).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
       super.supportsInterface(interfaceId);
   }
@@ -277,7 +277,7 @@ contract Game_Exchange is IGame_Exchange, ERC2771Context_Upgradeable, Roles, Acc
    * @dev Helpers
    */
 
-  function _exchangeCanMint(address _contractAddress) private view returns (bool) {
+  function _shopCanMint(address _contractAddress) private view returns (bool) {
     IAccessControl accessControlCheck = IAccessControl(_contractAddress);
 
     return accessControlCheck.hasRole(MINTER_ROLE, address(this));
