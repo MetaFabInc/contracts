@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "IGame_Lootbox",
-  "sourceName": "contracts/Lootbox/IGame_Lootbox.sol",
+  "contractName": "IGame_Lootbox_Manager",
+  "sourceName": "contracts/Lootbox_Manager/IGame_Lootbox_Manager.sol",
   "abi": [
     {
       "anonymous": false,
@@ -76,7 +76,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Lootbox.Lootbox",
+          "internalType": "struct IGame_Lootbox_Manager.Lootbox",
           "name": "lootbox",
           "type": "tuple"
         },
@@ -181,7 +181,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Lootbox.Lootbox",
+          "internalType": "struct IGame_Lootbox_Manager.Lootbox",
           "name": "lootbox",
           "type": "tuple"
         },
@@ -268,7 +268,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Lootbox.Lootbox",
+          "internalType": "struct IGame_Lootbox_Manager.Lootbox",
           "name": "lootbox",
           "type": "tuple"
         }
@@ -349,7 +349,7 @@
             }
           ],
           "indexed": false,
-          "internalType": "struct IGame_Lootbox.Lootbox",
+          "internalType": "struct IGame_Lootbox_Manager.Lootbox",
           "name": "lootbox",
           "type": "tuple"
         }
@@ -450,7 +450,7 @@
               "type": "uint256"
             }
           ],
-          "internalType": "struct IGame_Lootbox.Lootbox[]",
+          "internalType": "struct IGame_Lootbox_Manager.Lootbox[]",
           "name": "",
           "type": "tuple[]"
         }
@@ -501,7 +501,7 @@
               "type": "bool"
             }
           ],
-          "internalType": "struct IGame_Lootbox.OpenedLootbox[]",
+          "internalType": "struct IGame_Lootbox_Manager.OpenedLootbox[]",
           "name": "",
           "type": "tuple[]"
         }
@@ -613,7 +613,7 @@
               "type": "uint256"
             }
           ],
-          "internalType": "struct IGame_Lootbox.Lootbox",
+          "internalType": "struct IGame_Lootbox_Manager.Lootbox",
           "name": "",
           "type": "tuple"
         }
@@ -720,7 +720,7 @@
               "type": "bool"
             }
           ],
-          "internalType": "struct IGame_Lootbox.OpenedLootbox",
+          "internalType": "struct IGame_Lootbox_Manager.OpenedLootbox",
           "name": "",
           "type": "tuple"
         }
@@ -854,7 +854,7 @@
               "type": "uint256"
             }
           ],
-          "internalType": "struct IGame_Lootbox.Lootbox[]",
+          "internalType": "struct IGame_Lootbox_Manager.Lootbox[]",
           "name": "",
           "type": "tuple[]"
         }
@@ -915,7 +915,7 @@
               "type": "bool"
             }
           ],
-          "internalType": "struct IGame_Lootbox.OpenedLootbox[]",
+          "internalType": "struct IGame_Lootbox_Manager.OpenedLootbox[]",
           "name": "",
           "type": "tuple[]"
         }

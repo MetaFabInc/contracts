@@ -13,13 +13,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
-import "./IGame_Lootbox.sol";
+import "./IGame_Lootbox_Manager.sol";
 import "../Currency/IERC20_Game_Currency.sol";
 import "../Items_Collection/IERC1155_Game_Items_Collection.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
 
-contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, ERC1155Holder, Roles, AccessControl, ReentrancyGuard {
+contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeable, ERC1155Holder, Roles, AccessControl, ReentrancyGuard {
   using EnumerableSet for EnumerableSet.UintSet;
 
   EnumerableSet.UintSet private lootboxIds;
@@ -351,7 +351,7 @@ contract Game_Lootbox is IGame_Lootbox, ERC2771Context_Upgradeable, ERC1155Holde
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, ERC1155Receiver) returns (bool) {
     return
-      interfaceId == type(IGame_Lootbox).interfaceId ||
+      interfaceId == type(IGame_Lootbox_Manager).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
       super.supportsInterface(interfaceId);
   }

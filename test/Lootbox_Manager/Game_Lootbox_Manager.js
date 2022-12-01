@@ -4,11 +4,11 @@ const { BigNumber } = ethers;
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 
-describe('Game_Lootbox', () => {
+describe('Game_Lootbox_Manager', () => {
   let forwarderAddress;
   let forwarderContract;
   let itemsContract;
-  let lootboxContract;
+  let lootboxManagerContract;
   let owner;
   let otherAddresses;
 
@@ -17,7 +17,7 @@ describe('Game_Lootbox', () => {
 
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
     const ERC1155_Game_Items_Collection = await ethers.getContractFactory('ERC1155_Game_Items_Collection');
-    const Game_Lootbox = await ethers.getContractFactory('Game_Lootbox');
+    const Game_Lootbox_Manager = await ethers.getContractFactory('Game_Lootbox_Manager');
 
     owner = _owner;
     otherAddresses = _otherAddresses;
@@ -27,7 +27,7 @@ describe('Game_Lootbox', () => {
 
     itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress);
 
-    lootboxContract = await Game_Lootbox.deploy(forwarderAddress);
+    lootboxManagerContract = await Game_Lootbox_Manager.deploy(forwarderAddress);
   });
 
   /*
@@ -37,7 +37,7 @@ describe('Game_Lootbox', () => {
   it('Should deploy', async () => {
     await forwarderContract.deployed();
     await itemsContract.deployed();
-    await lootboxContract.deployed();
+    await lootboxManagerContract.deployed();
   });
 
   /*
@@ -66,7 +66,7 @@ describe('Game_Lootbox', () => {
       canMint: true,
     });
 
-    const lootbox = await lootboxContract.lootbox(lootboxId);
+    const lootbox = await lootboxManagerContract.lootbox(lootboxId);
 
     expect(lootbox.id * 1).to.equal(lootboxId);
     expect(lootbox.inputCollection).to.equal(itemsContract.address);
@@ -108,9 +108,9 @@ describe('Game_Lootbox', () => {
       canMint: true,
     });
 
-    const lootboxIds = await lootboxContract.allLootboxIds();
-    const lootboxes = await lootboxContract.allLootboxes();
-    const lootboxLastUpdates = await lootboxContract.allLootboxLastUpdates();
+    const lootboxIds = await lootboxManagerContract.allLootboxIds();
+    const lootboxes = await lootboxManagerContract.allLootboxes();
+    const lootboxLastUpdates = await lootboxManagerContract.allLootboxLastUpdates();
 
     expect(lootboxIds.length).to.equal(1);
     expect(lootboxIds[0] * 1).to.equal(lootboxId);
@@ -137,7 +137,7 @@ describe('Game_Lootbox', () => {
     }
 
     await new Promise(resolve => setTimeout(resolve, 500)); // wait
-    const lootboxes = await lootboxContract.paginateLootboxes(0, 15); // pagination should not overflow, 15 used to test
+    const lootboxes = await lootboxManagerContract.paginateLootboxes(0, 15); // pagination should not overflow, 15 used to test
 
     // lootboxes
     expect(lootboxes.length).to.equal(totalLootboxes);
@@ -147,7 +147,7 @@ describe('Game_Lootbox', () => {
     }
 
     // lootbox ids
-    const lootboxIds = await lootboxContract.paginateLootboxIds(0, 15);
+    const lootboxIds = await lootboxManagerContract.paginateLootboxIds(0, 15);
 
     expect(lootboxIds.length).to.equal(totalLootboxes);
 
@@ -156,7 +156,7 @@ describe('Game_Lootbox', () => {
     }
 
     // lootbox last updates
-    const lootboxLastUpdates = await lootboxContract.paginateLootboxLastUpdates(0, 15);
+    const lootboxLastUpdates = await lootboxManagerContract.paginateLootboxLastUpdates(0, 15);
 
     expect(lootboxLastUpdates.length).to.equal(totalLootboxes);
 
@@ -176,14 +176,14 @@ describe('Game_Lootbox', () => {
       canMint: true,
     });
 
-    expect((await lootboxContract.lootbox(lootboxId)).id * 1).to.equal(lootboxId);
-    expect(await lootboxContract.totalLootboxes() * 1).to.equal(1);
+    expect((await lootboxManagerContract.lootbox(lootboxId)).id * 1).to.equal(lootboxId);
+    expect(await lootboxManagerContract.totalLootboxes() * 1).to.equal(1);
 
-    await lootboxContract.removeLootbox(lootboxId);
+    await lootboxManagerContract.removeLootbox(lootboxId);
 
-    expect(await lootboxContract.totalLootboxes() * 1).to.equal(0);
+    expect(await lootboxManagerContract.totalLootboxes() * 1).to.equal(0);
 
-    await expect(lootboxContract.lootbox(lootboxId)).to.be.reverted;
+    await expect(lootboxManagerContract.lootbox(lootboxId)).to.be.reverted;
   });
 
   it('Should open/claim lootbox, mints items and increments opens', async () => {
@@ -199,30 +199,30 @@ describe('Game_Lootbox', () => {
     });
 
     const user = otherAddresses[0];
-    const lootbox = await lootboxContract.lootbox(lootboxId);
+    const lootbox = await lootboxManagerContract.lootbox(lootboxId);
 
     // mint & open
     await itemsContract.mintToAddress(user.address, lootboxItemId, 1);
-    await itemsContract.connect(user).setApprovalForAll(lootboxContract.address, true);
-    await lootboxContract.setClaimableBlockOffset(2); // 2 blocks to claim
-    await lootboxContract.connect(user).openLootbox(lootboxId);
+    await itemsContract.connect(user).setApprovalForAll(lootboxManagerContract.address, true);
+    await lootboxManagerContract.setClaimableBlockOffset(2); // 2 blocks to claim
+    await lootboxManagerContract.connect(user).openLootbox(lootboxId);
     expect(await itemsContract.balanceOf(user.address, lootboxId) * 1).to.equal(0);
-    expect(await lootboxContract.totalOpenedLootboxes(user.address, lootboxId) * 1).to.equal(1);
+    expect(await lootboxManagerContract.totalOpenedLootboxes(user.address, lootboxId) * 1).to.equal(1);
 
     // should fail to claim before block incrementation, claim attempt bumps block +1 in test
-    await expect(lootboxContract.connect(user).claimLootbox(lootboxId, 0)).to.be.reverted;
+    await expect(lootboxManagerContract.connect(user).claimLootbox(lootboxId, 0)).to.be.reverted;
 
     // increment block, block bump +1, total of 2, now claimable.
     await ethers.provider.send('evm_mine');
 
     // claim
-    expect(await lootboxContract.totalClaimableLootboxes(user.address, lootboxId) * 1).to.equal(1);
-    await lootboxContract.connect(user).claimLootboxes(lootboxId);
+    expect(await lootboxManagerContract.totalClaimableLootboxes(user.address, lootboxId) * 1).to.equal(1);
+    await lootboxManagerContract.connect(user).claimLootboxes(lootboxId);
 
     // check results
-    expect((await lootboxContract.lootbox(lootboxId)).opens * 1).to.equal(1);
+    expect((await lootboxManagerContract.lootbox(lootboxId)).opens * 1).to.equal(1);
 
-    const openedLootboxes = await lootboxContract.allOpenedLootboxes(user.address, lootboxId);
+    const openedLootboxes = await lootboxManagerContract.allOpenedLootboxes(user.address, lootboxId);
     const openedLootbox = openedLootboxes[0];
     const itemIds = [];
     const itemsReceived = {};
@@ -263,32 +263,32 @@ describe('Game_Lootbox', () => {
     });
 
     const user = otherAddresses[0];
-    const lootbox = await lootboxContract.lootbox(lootboxId);
+    const lootbox = await lootboxManagerContract.lootbox(lootboxId);
 
     // mint & open
     await itemsContract.mintToAddress(user.address, lootboxItemId, 1);
-    await itemsContract.mintToAddress(lootboxContract.address, 12, 10);
-    await itemsContract.mintToAddress(lootboxContract.address, 13, 10);
-    await itemsContract.connect(user).setApprovalForAll(lootboxContract.address, true);
-    await lootboxContract.setClaimableBlockOffset(2); // 2 blocks to claim
-    await lootboxContract.connect(user).openLootbox(lootboxId);
+    await itemsContract.mintToAddress(lootboxManagerContract.address, 12, 10);
+    await itemsContract.mintToAddress(lootboxManagerContract.address, 13, 10);
+    await itemsContract.connect(user).setApprovalForAll(lootboxManagerContract.address, true);
+    await lootboxManagerContract.setClaimableBlockOffset(2); // 2 blocks to claim
+    await lootboxManagerContract.connect(user).openLootbox(lootboxId);
     expect(await itemsContract.balanceOf(user.address, lootboxId) * 1).to.equal(0);
-    expect(await lootboxContract.totalOpenedLootboxes(user.address, lootboxId) * 1).to.equal(1);
+    expect(await lootboxManagerContract.totalOpenedLootboxes(user.address, lootboxId) * 1).to.equal(1);
 
     // should fail to claim before block incrementation, claim attempt bumps block +1 in test
-    await expect(lootboxContract.connect(user).claimLootbox(lootboxId, 0)).to.be.reverted;
+    await expect(lootboxManagerContract.connect(user).claimLootbox(lootboxId, 0)).to.be.reverted;
 
     // increment block, block bump +1, total of 2, now claimable.
     await ethers.provider.send('evm_mine');
 
     // claim
-    expect(await lootboxContract.totalClaimableLootboxes(user.address, lootboxId) * 1).to.equal(1);
-    await lootboxContract.connect(user).claimLootboxes(lootboxId);
+    expect(await lootboxManagerContract.totalClaimableLootboxes(user.address, lootboxId) * 1).to.equal(1);
+    await lootboxManagerContract.connect(user).claimLootboxes(lootboxId);
 
     // check results
-    expect((await lootboxContract.lootbox(lootboxId)).opens * 1).to.equal(1);
+    expect((await lootboxManagerContract.lootbox(lootboxId)).opens * 1).to.equal(1);
 
-    const openedLootboxes = await lootboxContract.allOpenedLootboxes(user.address, lootboxId);
+    const openedLootboxes = await lootboxManagerContract.allOpenedLootboxes(user.address, lootboxId);
     const openedLootbox = openedLootboxes[0];
     const itemIds = [];
     const itemsReceived = {};
@@ -309,7 +309,7 @@ describe('Game_Lootbox', () => {
       return inventory;
     }, {});
 
-    const contractInventory = (await itemsContract.balanceOfAll(lootboxContract.address)).reduce((inventory, item) => {
+    const contractInventory = (await itemsContract.balanceOfAll(lootboxManagerContract.address)).reduce((inventory, item) => {
       inventory[item[0] * 1] = item[1] * 1;
       return inventory;
     }, {});
@@ -333,8 +333,8 @@ describe('Game_Lootbox', () => {
       canMint: false,
     });
 
-    await itemsContract.connect(user).setApprovalForAll(lootboxContract.address, true);
-    await expect(lootboxContract.connect(user).openLootbox(lootboxId)).to.be.reverted;
+    await itemsContract.connect(user).setApprovalForAll(lootboxManagerContract.address, true);
+    await expect(lootboxManagerContract.connect(user).openLootbox(lootboxId)).to.be.reverted;
   });
 
   it('Fails to set lootbox when not owner', async () => {
@@ -350,7 +350,7 @@ describe('Game_Lootbox', () => {
       1,
     ];
 
-    await expect(lootboxContract.connect(user).setLootbox(...args)).to.be.reverted;
+    await expect(lootboxManagerContract.connect(user).setLootbox(...args)).to.be.reverted;
   })
 
   it('Fails to remove offer when not owner', async () => {
@@ -365,7 +365,7 @@ describe('Game_Lootbox', () => {
       canMint: false,
     });
 
-    await expect(lootboxContract.connect(user).removeLootbox(lootboxId)).to.be.reverted;
+    await expect(lootboxManagerContract.connect(user).removeLootbox(lootboxId)).to.be.reverted;
   });
 
   /*
@@ -386,7 +386,7 @@ describe('Game_Lootbox', () => {
     });
 
     await itemsContract.mintToAddress(sender.address, 1, 1);
-    await itemsContract.connect(sender).setApprovalForAll(lootboxContract.address, true);
+    await itemsContract.connect(sender).setApprovalForAll(lootboxManagerContract.address, true);
 
     const domain = {
       chainId,
@@ -409,11 +409,11 @@ describe('Game_Lootbox', () => {
     // sign request to open
     const openForwardRequest = {
       from: sender.address,
-      to: lootboxContract.address,
+      to: lootboxManagerContract.address,
       value: 0,
-      gas: await lootboxContract.connect(sender).estimateGas.openLootbox(lootboxId),
+      gas: await lootboxManagerContract.connect(sender).estimateGas.openLootbox(lootboxId),
       nonce: 41,
-      data: lootboxContract.interface.encodeFunctionData('openLootbox', [ lootboxId ]),
+      data: lootboxManagerContract.interface.encodeFunctionData('openLootbox', [ lootboxId ]),
     };
 
     const openSignature = await sender._signTypedData(domain, types, openForwardRequest);
@@ -437,11 +437,11 @@ describe('Game_Lootbox', () => {
     // sign request to claim
     const claimForwardRequest = {
       from: sender.address,
-      to: lootboxContract.address,
+      to: lootboxManagerContract.address,
       value: 0,
-      gas: await lootboxContract.connect(sender).estimateGas.claimLootboxes(lootboxId),
+      gas: await lootboxManagerContract.connect(sender).estimateGas.claimLootboxes(lootboxId),
       nonce: 42,
-      data: lootboxContract.interface.encodeFunctionData('claimLootboxes', [ lootboxId ]),
+      data: lootboxManagerContract.interface.encodeFunctionData('claimLootboxes', [ lootboxId ]),
     };
 
     const claimSignature = await sender._signTypedData(domain, types, claimForwardRequest);
@@ -451,12 +451,12 @@ describe('Game_Lootbox', () => {
   });
 
   it('Should properly upgrade trusted forwarder', async () => {
-    await lootboxContract.upgradeTrustedForwarder(otherAddresses[1].address);
-    expect(await lootboxContract.isTrustedForwarder(otherAddresses[1].address)).to.equal(true);
+    await lootboxManagerContract.upgradeTrustedForwarder(otherAddresses[1].address);
+    expect(await lootboxManagerContract.isTrustedForwarder(otherAddresses[1].address)).to.equal(true);
   });
 
   it('Fails to upgrade trusted forwarder if not owner', async () => {
-    await expect(lootboxContract.connect(otherAddresses[0]).upgradeTrustedForwarder(
+    await expect(lootboxManagerContract.connect(otherAddresses[0]).upgradeTrustedForwarder(
       otherAddresses[1].address,
     )).to.be.reverted;
   });
@@ -478,10 +478,10 @@ describe('Game_Lootbox', () => {
     canMint = false,
   }) {
     if (canMint) {
-      await itemsContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), lootboxContract.address);
+      await itemsContract.grantRole(ethers.utils.id("METAFAB_MINTER_ROLE"), lootboxManagerContract.address);
     }
 
-    return lootboxContract.setLootbox(
+    return lootboxManagerContract.setLootbox(
       lootboxId,
       [ inputCollection, outputCollection ],
       [ inputCollectionItemIds, outputCollectionItemIds ],
