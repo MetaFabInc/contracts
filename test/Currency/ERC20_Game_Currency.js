@@ -565,6 +565,79 @@ describe('ERC20_Game_Currency', () => {
         )
       ).to.be.reverted;
     });
+*/
+    it('Should allow gasless transactions signed by an approved delegate', async () => {
+      const abiCoder = ethers.utils.defaultAbiCoder;
+      const signer = otherAddresses[0];
+      const sender = otherAddresses[1];
+      const delegate = owner;
+      const args = [ delegate.address, true, signer.address, BigNumber.from(53135) ];
+      const hash = ethers.utils.keccak256(abiCoder.encode([ 'address', 'bool', 'address', 'uint256' ], args));
+      const approvalSignature = await signer.signMessage(ethers.utils.arrayify(hash));
+
+      // set delegate, sender sets approval to prevent signer paying gas to approve.
+      await forwarderContract.connect(sender).setApprovalForAllBySignature(...args, approvalSignature);
+
+      // setup
+      const chainId = 31337; // hardhat
+      const recipient = otherAddresses[2];
+      const transferAmount = getTokenDecimalAmount(500);
+      const ref = 1337;
+
+      const mintAmount = getTokenDecimalAmount(1250);
+
+      // mint sender some tokens to transfer
+      await tokenContract.mint(signer.address, mintAmount);
+
+      // create request object
+      const gasEstimate = await tokenContract.connect(signer).estimateGas.transferWithFeeRef(recipient.address, transferAmount, ref);
+      const callData = tokenContract.interface.encodeFunctionData('transferWithFeeRef', [
+        recipient.address,
+        transferAmount,
+        ref,
+      ]);
+
+      const forwardRequest = {
+        from: signer.address,
+        to: tokenContract.address,
+        value: getTokenDecimalAmount(0),
+        gas: gasEstimate,
+        nonce: getTokenDecimalAmount(2),
+        data: callData,
+      };
+
+      // Sign message
+      const domain = {
+        chainId,
+        name: 'ERC2771_Trusted_Forwarder',
+        verifyingContract: forwarderContract.address,
+        version: '1.0.0',
+      };
+
+      const types = {
+        ForwardRequest: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'gas', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'data', type: 'bytes' },
+        ],
+      };
+
+      const signature = await delegate._signTypedData(
+        domain,
+        types,
+        forwardRequest,
+      );
+
+      const senderAccountBalance = await sender.getBalance() * 1;
+
+      await forwarderContract.connect(sender).execute(forwardRequest, signature);
+
+      expect(await tokenContract.balanceOf(signer.address) * 1).to.equal(mintAmount * 1 - transferAmount * 1);
+      expect(await tokenContract.balanceOf(recipient.address) * 1).to.equal(transferAmount * 1);
+    });
 
     it('Should properly upgrade trusted forwarder', async () => {
       await tokenContract.upgradeTrustedForwarder(otherAddresses[1].address);

@@ -44,7 +44,7 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
   }
 
   function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {
-    require(verify(req, signature), "ERC2771_Trusted_Forwarder: signature does not match request or nonce has been used");
+    require(verify(req, signature), "ERC2771_Trusted_Forwarder: bad signature, nonce has been used, or not approved delegate.");
 
     _nonces[req.from][req.nonce] = true;
 
