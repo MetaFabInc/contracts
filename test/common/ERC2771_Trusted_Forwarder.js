@@ -33,10 +33,20 @@ describe('ERC2771_Trusted_Forwarder', () => {
   });
 
   it('Should set delegate approval', async () => {
-    //await forwarderContract.connect(otherAddresses[1]).setApprovalForAll(delegate, true);
+    await forwarderContract.connect(otherAddresses[1]).setApprovalForAll(delegate.address, true);
   });
 
   it('Should set delegate approval by signature', async () => {
-    //
+    const abiCoder = ethers.utils.defaultAbiCoder;
+    const signer = otherAddresses[0];
+    const args = [ delegate.address, true, signer.address, BigNumber.from(53135) ];
+    const hash = ethers.utils.keccak256(abiCoder.encode(
+      [ 'address', 'bool', 'address', 'uint256' ],
+      args,
+    ));
+
+    const signature = await signer.signMessage(ethers.utils.arrayify(hash));
+
+    await forwarderContract.connect(otherAddresses[1]).setApprovalForAllBySignature(...args, signature);
   });
 });
