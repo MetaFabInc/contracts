@@ -6,6 +6,9 @@
 //
 // Launch your crypto game or gamefi project's blockchain
 // infrastructure & game APIs fast with https://trymetafab.com
+//
+// v1.1.0 MetaFab Forwarder (Dec 2nd, 2022)
+//
 
 pragma solidity ^0.8.16;
 

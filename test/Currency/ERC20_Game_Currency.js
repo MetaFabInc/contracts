@@ -565,7 +565,7 @@ describe('ERC20_Game_Currency', () => {
         )
       ).to.be.reverted;
     });
-*/
+
     it('Should allow gasless transactions signed by an approved delegate', async () => {
       const abiCoder = ethers.utils.defaultAbiCoder;
       const signer = otherAddresses[0];
