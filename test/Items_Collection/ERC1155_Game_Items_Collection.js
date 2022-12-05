@@ -5,6 +5,8 @@ const { BigNumber } = ethers;
 const abiCoder = ethers.utils.defaultAbiCoder;
 
 describe('ERC1155_Game_Items_Collection', () => {
+  const systemId = ethers.utils.id('12857128-feughsfyusg-3251');
+
   let forwarderAddress;
   let forwarderContract;
   let itemsContract;
@@ -23,7 +25,7 @@ describe('ERC1155_Game_Items_Collection', () => {
     forwarderContract = await ERC2771_Trusted_Forwarder.deploy();
     forwarderAddress = forwarderContract.address;
 
-    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress);
+    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress, systemId);
   });
 
   /*

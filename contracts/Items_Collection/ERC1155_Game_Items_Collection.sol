@@ -15,8 +15,9 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "./IERC1155_Game_Items_Collection.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
+import "../common/System.sol";
 
-contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC1155, ERC2771Context_Upgradeable, Roles, AccessControl {
+contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC1155, ERC2771Context_Upgradeable, Roles, System, AccessControl {
   using Strings for uint256;
 
   uint256[] public itemIds;
@@ -26,9 +27,10 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
   mapping(uint256 => uint256) public itemTransferTimelocks; // itemId => timestamp.
   mapping(uint256 => string) private itemURIs; // itemId => complete metadata uri
 
-  constructor(address _forwarder)
+  constructor(address _forwarder, bytes32 _systemId)
   ERC1155("")
-  ERC2771Context_Upgradeable(_forwarder) {
+  ERC2771Context_Upgradeable(_forwarder)
+  System(_systemId) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     _setupRole(OWNER_ROLE, _msgSender());
   }

@@ -15,8 +15,9 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IERC20_Game_Currency.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
+import "../common/System.sol";
 
-contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgradeable, Roles, AccessControl {
+contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgradeable, Roles, System, AccessControl {
   uint256 public feeBps;
   uint256 public feeFixed;
   uint256 public feeCap;
@@ -24,9 +25,10 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
   address public childChainManagerProxy;
   uint256 public immutable supplyCap;
 
-  constructor(string memory _name, string memory _symbol, uint256 _supplyCap, address _forwarder)
+  constructor(string memory _name, string memory _symbol, uint256 _supplyCap, address _forwarder, bytes32 _systemId)
   ERC20(_name, _symbol)
-  ERC2771Context_Upgradeable(_forwarder) {
+  ERC2771Context_Upgradeable(_forwarder)
+  System(_systemId) {
     feeRecipient = _msgSender();
     supplyCap = _supplyCap;
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());

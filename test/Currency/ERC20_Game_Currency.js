@@ -5,6 +5,8 @@ const { BigNumber } = ethers;
 const abiCoder = ethers.utils.defaultAbiCoder;
 
 describe('ERC20_Game_Currency', () => {
+  const systemId = ethers.utils.id('121251a-seghjsbeg-21412');
+
   let forwarderAddress;
   let forwarderContract;
   let tokenContract;
@@ -31,6 +33,7 @@ describe('ERC20_Game_Currency', () => {
       "MGT",
       getTokenDecimalAmount(1000000),
       forwarderAddress,
+      systemId,
     );
   });
 
@@ -45,6 +48,10 @@ describe('ERC20_Game_Currency', () => {
 
   it('Should return the expected decimals', async () => {
     expect(await tokenContract.decimals()).to.equal(18);
+  });
+
+  it('Should return the expected systemId', async () => {
+    expect(await tokenContract.systemId()).to.equal(systemId);
   });
 
   it('Should mint, transfer and burn tokens', async () => {
@@ -571,12 +578,12 @@ describe('ERC20_Game_Currency', () => {
       const signer = otherAddresses[0];
       const sender = otherAddresses[1];
       const delegate = owner;
-      const args = [ delegate.address, true, signer.address, BigNumber.from(53135) ];
-      const hash = ethers.utils.keccak256(abiCoder.encode([ 'address', 'bool', 'address', 'uint256' ], args));
+      const args = [ systemId, delegate.address, true, signer.address, BigNumber.from(53135) ];
+      const hash = ethers.utils.keccak256(abiCoder.encode([ 'bytes32', 'address', 'bool', 'address', 'uint256' ], args));
       const approvalSignature = await signer.signMessage(ethers.utils.arrayify(hash));
 
       // set delegate, sender sets approval to prevent signer paying gas to approve.
-      await forwarderContract.connect(sender).setApprovalForAllBySignature(...args, approvalSignature);
+      await forwarderContract.connect(sender).setDelegateApprovalForSystemBySignature(...args, approvalSignature);
 
       // setup
       const chainId = 31337; // hardhat

@@ -5,6 +5,8 @@ const { BigNumber } = ethers;
 const abiCoder = ethers.utils.defaultAbiCoder;
 
 describe('ERC2771_Trusted_Forwarder', () => {
+  const systemId = ethers.utils.id('214124-12u51u2-521512');
+
   let forwarderAddress;
   let forwarderContract;
   let owner;
@@ -32,21 +34,25 @@ describe('ERC2771_Trusted_Forwarder', () => {
     await forwarderContract.deployed();
   });
 
-  it('Should set delegate approval', async () => {
-    await forwarderContract.connect(otherAddresses[1]).setApprovalForAll(delegate.address, true);
+  it('Should set delegate approval for system', async () => {
+    await forwarderContract.connect(otherAddresses[1]).setDelegateApprovalForSystem(systemId, delegate.address, true);
+
+    expect(await forwarderContract.isDelegateApprovedForSystem(otherAddresses[1].address, systemId, delegate.address)).to.equal(true);
   });
 
-  it('Should set delegate approval by signature', async () => {
+  it('Should set delegate approval for system by signature', async () => {
     const abiCoder = ethers.utils.defaultAbiCoder;
     const signer = otherAddresses[0];
-    const args = [ delegate.address, true, signer.address, BigNumber.from(53135) ];
+    const args = [ systemId, delegate.address, true, signer.address, BigNumber.from(53135) ];
     const hash = ethers.utils.keccak256(abiCoder.encode(
-      [ 'address', 'bool', 'address', 'uint256' ],
+      [ 'bytes32', 'address', 'bool', 'address', 'uint256' ],
       args,
     ));
 
     const signature = await signer.signMessage(ethers.utils.arrayify(hash));
 
-    await forwarderContract.connect(otherAddresses[1]).setApprovalForAllBySignature(...args, signature);
+    await forwarderContract.connect(otherAddresses[1]).setDelegateApprovalForSystemBySignature(...args, signature);
+
+    expect(await forwarderContract.isDelegateApprovedForSystem(signer.address, systemId, delegate.address)).to.equal(true);
   });
 });

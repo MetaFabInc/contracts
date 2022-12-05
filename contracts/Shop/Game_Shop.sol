@@ -18,15 +18,17 @@ import "../Currency/IERC20_Game_Currency.sol";
 import "../Items_Collection/IERC1155_Game_Items_Collection.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
+import "../common/System.sol";
 
-contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, AccessControl, ReentrancyGuard, ERC1155Holder {
+contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, AccessControl, ReentrancyGuard, ERC1155Holder {
   using EnumerableSet for EnumerableSet.UintSet;
 
   EnumerableSet.UintSet private offerIds;
   mapping(uint256 => Offer) private offers;
 
-  constructor(address _forwarder)
-  ERC2771Context_Upgradeable(_forwarder) {
+  constructor(address _forwarder, bytes32 _systemId)
+  ERC2771Context_Upgradeable(_forwarder)
+  System(_systemId) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     _setupRole(OWNER_ROLE, _msgSender());
   }

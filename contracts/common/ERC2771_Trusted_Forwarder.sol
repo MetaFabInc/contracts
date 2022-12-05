@@ -6,14 +6,12 @@
 //
 // Launch your crypto game or gamefi project's blockchain
 // infrastructure & game APIs fast with https://trymetafab.com
-//
-// v1.1.0 MetaFab Forwarder (Dec 2nd, 2022)
-//
 
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
+import "./ISystem.sol";
 
 contract ERC2771_Trusted_Forwarder is EIP712 {
   using ECDSA for bytes32;
@@ -33,8 +31,8 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
   // mapping from account to gasless tx nonces to prevent replay
   mapping(address => mapping(uint256 => bool)) private _nonces;
 
-  // mapping from account to gasless delegate approvals
-  mapping(address => mapping(address => bool)) private _delegateApprovals;
+  // mapping from account address -> system id -> delegate signer address approvals
+  mapping(address => mapping(bytes32 => mapping(address => bool))) private _systemDelegateApprovals;
 
   constructor() EIP712("ERC2771_Trusted_Forwarder", "1.0.0") {}
 
@@ -43,11 +41,11 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
       keccak256(abi.encode(_TYPEHASH, req.from, req.to, req.value, req.gas, req.nonce, keccak256(req.data)))
     ).recover(signature);
 
-    return !_nonces[req.from][req.nonce] && (signer == req.from || _delegateApprovals[req.from][signer]);
+    return !_nonces[req.from][req.nonce] && (signer == req.from || isDelegateApprovedForSystem(req.from, ISystem(req.to).systemId(), signer));
   }
 
   function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {
-    require(verify(req, signature), "ERC2771_Trusted_Forwarder: bad signature, nonce has been used, or not approved delegate.");
+    require(verify(req, signature), "ERC2771_Trusted_Forwarder: signature does not match request, signer is not approved for system, or nonce has been used");
 
     _nonces[req.from][req.nonce] = true;
 
@@ -62,16 +60,20 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
     return (success, returndata);
   }
 
-  function setApprovalForAll(address delegate, bool approved) external {
-    _delegateApprovals[msg.sender][delegate] = approved;
+  function isDelegateApprovedForSystem(address account, bytes32 systemId, address delegate) public view returns (bool) {
+    return _systemDelegateApprovals[account][systemId][delegate];
   }
 
-  function setApprovalForAllBySignature(address delegate, bool approved, address signer, uint256 nonce, bytes calldata signature) external {
-    address recoveredSigner = keccak256(abi.encode(delegate, approved, signer, nonce)).toEthSignedMessageHash().recover(signature);
+  function setDelegateApprovalForSystem(bytes32 systemId, address delegate, bool approved) external {
+    _systemDelegateApprovals[msg.sender][systemId][delegate] = approved;
+  }
+
+  function setDelegateApprovalForSystemBySignature(bytes32 systemId, address delegate, bool approved, address signer, uint256 nonce, bytes calldata signature) external {
+    address recoveredSigner = keccak256(abi.encode(systemId, delegate, approved, signer, nonce)).toEthSignedMessageHash().recover(signature);
     require(signer == recoveredSigner, "Signer recovered from signature mismatched signer");
     require(!_nonces[signer][nonce], "nonce has been used");
 
     _nonces[signer][nonce] = true;
-    _delegateApprovals[signer][delegate] = approved;
+    _systemDelegateApprovals[signer][systemId][delegate] = approved;
   }
 }

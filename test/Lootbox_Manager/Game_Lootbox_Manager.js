@@ -5,6 +5,8 @@ const { BigNumber } = ethers;
 const abiCoder = ethers.utils.defaultAbiCoder;
 
 describe('Game_Lootbox_Manager', () => {
+  const systemId = ethers.utils.id('125812-suefhseyuf-32513');
+
   let forwarderAddress;
   let forwarderContract;
   let itemsContract;
@@ -25,9 +27,9 @@ describe('Game_Lootbox_Manager', () => {
     forwarderContract = await ERC2771_Trusted_Forwarder.deploy();
     forwarderAddress = forwarderContract.address;
 
-    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress);
+    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress, systemId);
 
-    lootboxManagerContract = await Game_Lootbox_Manager.deploy(forwarderAddress);
+    lootboxManagerContract = await Game_Lootbox_Manager.deploy(forwarderAddress, systemId);
   });
 
   /*

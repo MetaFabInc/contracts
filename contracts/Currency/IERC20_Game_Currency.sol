@@ -11,8 +11,9 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "../common/ISystem.sol";
 
-interface IERC20_Game_Currency is IERC20, IERC165  {
+interface IERC20_Game_Currency is IERC20, IERC165, ISystem  {
   // events
   event TransferRef(address indexed sender, address indexed recipient, uint256 amount, uint256 ref);
   event BatchTransferRef(address indexed sender, address[] recipients, uint256[] amounts, uint256[] refs);

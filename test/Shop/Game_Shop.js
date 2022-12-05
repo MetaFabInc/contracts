@@ -5,6 +5,8 @@ const { BigNumber } = ethers;
 const abiCoder = ethers.utils.defaultAbiCoder;
 
 describe('Game_Shop', () => {
+  const systemId = ethers.utils.id('euahfe-31351-awduawh');
+
   let forwarderAddress;
   let forwarderContract;
   let tokenContract;
@@ -32,11 +34,12 @@ describe('Game_Shop', () => {
       "MGT",
       getTokenDecimalAmount(1000000),
       forwarderAddress,
+      systemId,
     );
 
-    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress);
+    itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress, systemId);
 
-    shopContract = await Game_Shop.deploy(forwarderAddress);
+    shopContract = await Game_Shop.deploy(forwarderAddress, systemId);
   });
 
   /*

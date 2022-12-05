@@ -18,8 +18,9 @@ import "../Currency/IERC20_Game_Currency.sol";
 import "../Items_Collection/IERC1155_Game_Items_Collection.sol";
 import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
+import "../common/System.sol";
 
-contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeable, ERC1155Holder, Roles, AccessControl, ReentrancyGuard {
+contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeable, ERC1155Holder, Roles, System, AccessControl, ReentrancyGuard {
   using EnumerableSet for EnumerableSet.UintSet;
 
   EnumerableSet.UintSet private lootboxIds;
@@ -27,8 +28,9 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
   mapping(address => mapping(uint256 => OpenedLootbox[])) private openedLootboxes; // addr -> lootboxId -> OpenedLootbox[]
   uint256 claimableBlockOffset = 1;
 
-  constructor(address _forwarder)
-  ERC2771Context_Upgradeable(_forwarder) {
+  constructor(address _forwarder, bytes32 _systemId)
+  ERC2771Context_Upgradeable(_forwarder)
+  System(_systemId) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     _setupRole(OWNER_ROLE, _msgSender());
   }

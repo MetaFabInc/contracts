@@ -11,8 +11,9 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "../common/ISystem.sol";
 
-interface IGame_Shop  {
+interface IGame_Shop is ISystem  {
   // structs
   struct Offer {
     uint256 id;
