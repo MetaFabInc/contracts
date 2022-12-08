@@ -4,11 +4,11 @@ const { BigNumber } = ethers;
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 
-describe('System_Delegate_Approvals', () => {
+describe('System_Delegate_Approver', () => {
   const systemId = ethers.utils.id('214124-12u51u2-521512');
 
-  let systemDelegateApprovalsAddress;
-  let systemDelegateApprovalsContract;
+  let systemDelegateApproverAddress;
+  let systemDelegateApproverContract;
   let owner;
   let delegate;
   let otherAddresses;
@@ -16,14 +16,14 @@ describe('System_Delegate_Approvals', () => {
   beforeEach(async () => {
     const [ _owner, _delegate, ..._otherAddresses ] = await ethers.getSigners();
 
-    const System_Delegate_Approvals = await ethers.getContractFactory('System_Delegate_Approvals');
+    const System_Delegate_Approver = await ethers.getContractFactory('System_Delegate_Approver');
 
     owner = _owner;
     delegate = _delegate;
     otherAddresses = _otherAddresses;
 
-    systemDelegateApprovalsContract = await System_Delegate_Approvals.deploy();
-    systemDelegateApprovalsAddress = systemDelegateApprovalsContract.address;
+    systemDelegateApproverContract = await System_Delegate_Approver.deploy();
+    systemDelegateApproverAddress = systemDelegateApproverContract.address;
   });
 
   /*
@@ -31,13 +31,13 @@ describe('System_Delegate_Approvals', () => {
    */
 
   it('Should deploy', async () => {
-    await systemDelegateApprovalsContract.deployed();
+    await systemDelegateApproverContract.deployed();
   });
 
   it('Should set delegate approval for system', async () => {
-    await systemDelegateApprovalsContract.connect(otherAddresses[1]).setDelegateApprovalForSystem(systemId, delegate.address, true);
+    await systemDelegateApproverContract.connect(otherAddresses[1]).setDelegateApprovalForSystem(systemId, delegate.address, true);
 
-    expect(await systemDelegateApprovalsContract.isDelegateApprovedForSystem(otherAddresses[1].address, systemId, delegate.address)).to.equal(true);
+    expect(await systemDelegateApproverContract.isDelegateApprovedForSystem(otherAddresses[1].address, systemId, delegate.address)).to.equal(true);
   });
 
   it('Should set delegate approval for system by signature', async () => {
@@ -51,8 +51,8 @@ describe('System_Delegate_Approvals', () => {
 
     const signature = await signer.signMessage(ethers.utils.arrayify(hash));
 
-    await systemDelegateApprovalsContract.connect(otherAddresses[1]).setDelegateApprovalForSystemBySignature(...args, signature);
+    await systemDelegateApproverContract.connect(otherAddresses[1]).setDelegateApprovalForSystemBySignature(...args, signature);
 
-    expect(await systemDelegateApprovalsContract.isDelegateApprovedForSystem(signer.address, systemId, delegate.address)).to.equal(true);
+    expect(await systemDelegateApproverContract.isDelegateApprovedForSystem(signer.address, systemId, delegate.address)).to.equal(true);
   });
 });

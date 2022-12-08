@@ -7,8 +7,8 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 describe('Game_Shop', () => {
   const systemId = ethers.utils.id('euahfe-31351-awduawh');
 
-  let systemDelegateApprovalsAddress;
-  let systemDelegateApprovalsContract;
+  let systemDelegateApproverAddress;
+  let systemDelegateApproverContract;
   let forwarderAddress;
   let forwarderContract;
   let tokenContract;
@@ -20,7 +20,7 @@ describe('Game_Shop', () => {
   beforeEach(async () => {
     const [ _owner, ..._otherAddresses ] = await ethers.getSigners();
 
-    const System_Delegate_Approvals = await ethers.getContractFactory('System_Delegate_Approvals');
+    const System_Delegate_Approver = await ethers.getContractFactory('System_Delegate_Approver');
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
     const ERC20_Game_Currency = await ethers.getContractFactory('ERC20_Game_Currency');
     const ERC1155_Game_Items_Collection = await ethers.getContractFactory('ERC1155_Game_Items_Collection');
@@ -29,10 +29,10 @@ describe('Game_Shop', () => {
     owner = _owner;
     otherAddresses = _otherAddresses;
 
-    systemDelegateApprovalsContract = await System_Delegate_Approvals.deploy();
-    systemDelegateApprovalsAddress = systemDelegateApprovalsContract.address;
+    systemDelegateApproverContract = await System_Delegate_Approver.deploy();
+    systemDelegateApproverAddress = systemDelegateApproverContract.address;
 
-    forwarderContract = await ERC2771_Trusted_Forwarder.deploy(systemDelegateApprovalsAddress);
+    forwarderContract = await ERC2771_Trusted_Forwarder.deploy(systemDelegateApproverAddress);
     forwarderAddress = forwarderContract.address;
 
     tokenContract = await ERC20_Game_Currency.deploy(

@@ -12,7 +12,7 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "./ISystem.sol";
-import "./ISystem_Delegate_Approvals.sol";
+import "./ISystem_Delegate_Approver.sol";
 
 contract ERC2771_Trusted_Forwarder is EIP712 {
   using ECDSA for bytes32;
@@ -32,10 +32,10 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
   // mapping from account to gasless tx nonces to prevent replay
   mapping(address => mapping(uint256 => bool)) private _nonces;
 
-  ISystem_Delegate_Approvals immutable systemDelegateApprovals;
+  ISystem_Delegate_Approver immutable systemDelegateApprover;
 
-  constructor(address _systemDelegateApprovals) EIP712("ERC2771_Trusted_Forwarder", "1.0.0") {
-    systemDelegateApprovals = ISystem_Delegate_Approvals(_systemDelegateApprovals);
+  constructor(address _systemDelegateApprover) EIP712("ERC2771_Trusted_Forwarder", "1.0.0") {
+    systemDelegateApprover = ISystem_Delegate_Approver(_systemDelegateApprover);
   }
 
   function verify(ForwardRequest calldata req, bytes calldata signature) public view returns (bool) {
@@ -43,7 +43,7 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
       keccak256(abi.encode(_TYPEHASH, req.from, req.to, req.value, req.gas, req.nonce, keccak256(req.data)))
     ).recover(signature);
 
-    return !_nonces[req.from][req.nonce] && (signer == req.from || systemDelegateApprovals.isDelegateApprovedForSystem(req.from, ISystem(req.to).systemId(), signer));
+    return !_nonces[req.from][req.nonce] && (signer == req.from || systemDelegateApprover.isDelegateApprovedForSystem(req.from, ISystem(req.to).systemId(), signer));
   }
 
   function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {

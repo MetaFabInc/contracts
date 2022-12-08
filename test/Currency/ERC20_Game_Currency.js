@@ -7,8 +7,8 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 describe('ERC20_Game_Currency', () => {
   const systemId = ethers.utils.id('121251a-seghjsbeg-21412');
 
-  let systemDelegateApprovalsAddress;
-  let systemDelegateApprovalsContract;
+  let systemDelegateApproverAddress;
+  let systemDelegateApproverContract;
   let forwarderAddress;
   let forwarderContract;
   let tokenContract;
@@ -19,17 +19,17 @@ describe('ERC20_Game_Currency', () => {
   beforeEach(async () => {
     const [ _owner, ..._otherAddresses ] = await ethers.getSigners();
 
-    const System_Delegate_Approvals = await ethers.getContractFactory('System_Delegate_Approvals');
+    const System_Delegate_Approver = await ethers.getContractFactory('System_Delegate_Approver');
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
     const ERC20_Game_Currency = await ethers.getContractFactory('ERC20_Game_Currency');
 
     owner = _owner;
     otherAddresses = _otherAddresses;
 
-    systemDelegateApprovalsContract = await System_Delegate_Approvals.deploy();
-    systemDelegateApprovalsAddress = systemDelegateApprovalsContract.address;
+    systemDelegateApproverContract = await System_Delegate_Approver.deploy();
+    systemDelegateApproverAddress = systemDelegateApproverContract.address;
 
-    forwarderContract = await ERC2771_Trusted_Forwarder.deploy(systemDelegateApprovalsAddress);
+    forwarderContract = await ERC2771_Trusted_Forwarder.deploy(systemDelegateApproverAddress);
     forwarderAddress = forwarderContract.address;
 
     childChainManager = _otherAddresses[1]; // For testing, production would point at the polygon bridge.
@@ -593,7 +593,7 @@ describe('ERC20_Game_Currency', () => {
       const approvalSignature = await signer.signMessage(ethers.utils.arrayify(hash));
 
       // set delegate, sender sets approval to prevent signer paying gas to approve.
-      await systemDelegateApprovalsContract.connect(sender).setDelegateApprovalForSystemBySignature(...args, approvalSignature);
+      await systemDelegateApproverContract.connect(sender).setDelegateApprovalForSystemBySignature(...args, approvalSignature);
 
       // setup
       const chainId = 31337; // hardhat

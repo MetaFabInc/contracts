@@ -7,8 +7,8 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 describe('ERC1155_Game_Items_Collection', () => {
   const systemId = ethers.utils.id('12857128-feughsfyusg-3251');
 
-  let systemDelegateApprovalsAddress;
-  let systemDelegateApprovalsContract;
+  let systemDelegateApproverAddress;
+  let systemDelegateApproverContract;
   let forwarderAddress;
   let forwarderContract;
   let itemsContract;
@@ -18,17 +18,17 @@ describe('ERC1155_Game_Items_Collection', () => {
   beforeEach(async () => {
     const [ _owner, ..._otherAddresses ] = await ethers.getSigners();
 
-    const System_Delegate_Approvals = await ethers.getContractFactory('System_Delegate_Approvals');
+    const System_Delegate_Approver = await ethers.getContractFactory('System_Delegate_Approver');
     const ERC2771_Trusted_Forwarder = await ethers.getContractFactory('ERC2771_Trusted_Forwarder');
     const ERC1155_Game_Items_Collection = await ethers.getContractFactory('ERC1155_Game_Items_Collection');
 
     owner = _owner;
     otherAddresses = _otherAddresses;
 
-    systemDelegateApprovalsContract = await System_Delegate_Approvals.deploy();
-    systemDelegateApprovalsAddress = systemDelegateApprovalsContract.address;
+    systemDelegateApproverContract = await System_Delegate_Approver.deploy();
+    systemDelegateApproverAddress = systemDelegateApproverContract.address;
 
-    forwarderContract = await ERC2771_Trusted_Forwarder.deploy(systemDelegateApprovalsAddress);
+    forwarderContract = await ERC2771_Trusted_Forwarder.deploy(systemDelegateApproverAddress);
     forwarderAddress = forwarderContract.address;
 
     itemsContract = await ERC1155_Game_Items_Collection.deploy(forwarderAddress, systemId);
