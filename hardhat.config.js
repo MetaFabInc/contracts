@@ -43,6 +43,16 @@ module.exports = {
   },
   etherscan: {
     apiKey: '',
+    customChains: [
+    {
+      network: "arbitrumGoerli",
+      chainId: 421613,
+      urls: {
+        apiURL: "https://api-goerli.arbiscan.io/api",
+        browserURL: "https://goerli.arbiscan.io/"
+      }
+    }
+  ]
   },
   mocha: {
     timeout: 60 * 60 * 1000,
