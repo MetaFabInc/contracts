@@ -54,6 +54,10 @@ describe('ERC20_Game_Currency', () => {
     expect(await tokenContract.systemId()).to.equal(systemId);
   });
 
+  it('Should return the expected trustedForwarder', async () => {
+    expect(await tokenContract.trustedForwarder()).to.equal(forwarderAddress);
+  });
+
   it('Should mint, transfer and burn tokens', async () => {
     await tokenContract.deployed();
 

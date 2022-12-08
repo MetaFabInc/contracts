@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
  */
 
 abstract contract ERC2771Context_Upgradeable is Context {
-  address private trustedForwarder;
+  address public trustedForwarder;
 
   constructor(address _trustedForwarder) {
     trustedForwarder = _trustedForwarder;
