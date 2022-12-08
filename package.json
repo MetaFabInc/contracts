@@ -2,12 +2,12 @@
   "name": "metafab-contracts",
   "description": "Template contracts deployed by MetaFab.",
   "homepage": "https://trymetafab.com",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "scripts": {
     "test": "npx hardhat test"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.7.3",
+    "@openzeppelin/contracts": "^4.8.0",
     "hardhat": "^2.10.1"
   },
   "devDependencies": {
