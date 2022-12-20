@@ -38,4 +38,5 @@ interface IERC1155_Game_Items_Collection is IERC1155, ISystem  {
   function paginateItemIds(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[] memory);
   function paginateItemSupplies(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (uint256[][] memory);
   function paginateItemURIs(uint256 itemIdsStartIndexInclusive, uint256 limit) external view returns (string[] memory);
+  function transferOwnershipControl(address _newOwner) external;
 }

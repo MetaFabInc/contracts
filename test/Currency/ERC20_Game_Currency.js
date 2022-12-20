@@ -109,6 +109,22 @@ describe('ERC20_Game_Currency', () => {
     await expect(tokenContract.transferOwnership(newOwnerAddress)).to.be.reverted;
   });
 
+  it('Should transfer ownership and control', async () => {
+    await tokenContract.deployed();
+
+    const newOwnerAddress = otherAddresses[0].address;
+
+    expect(await tokenContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(true);
+    expect(await tokenContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(false);
+    expect(await tokenContract.owner()).to.equal(owner.address);
+    await tokenContract.transferOwnershipControl(newOwnerAddress);
+    expect(await tokenContract.owner()).to.equal(newOwnerAddress);
+    await expect(tokenContract.transferOwnership(newOwnerAddress)).to.be.reverted;
+    await expect(tokenContract.transferOwnershipControl(newOwnerAddress)).to.be.reverted;
+    expect(await tokenContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(false);
+    expect(await tokenContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(true);
+  });
+
   /*
    * Bridge Tests
    */

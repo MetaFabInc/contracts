@@ -41,4 +41,5 @@ interface IERC20_Game_Currency is IERC20, IERC165, ISystem  {
   function transferWithFee(address recipient, uint256 amount) external returns (bool);
   function transferWithFeeRef(address recipient, uint256 amount, uint256 ref) external returns (bool);
   function setFees(address recipient, uint _feeBps, uint _feeFixed, uint _feeCap) external;
+  function transferOwnershipControl(address _newOwner) external;
 }

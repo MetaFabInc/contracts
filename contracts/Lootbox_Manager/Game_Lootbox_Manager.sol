@@ -348,7 +348,7 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
   }
 
   /**
-   * @dev Support for role control
+   * @dev Support for roles & control
    */
 
   function grantRole(bytes32 _role, address _account) public virtual override {
@@ -362,6 +362,11 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
     }
 
     _grantRole(_role, _account);
+  }
+
+  function transferOwnershipControl(address _newOwner) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _grantRole(DEFAULT_ADMIN_ROLE, _newOwner);
+    _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
   }
 
   /**

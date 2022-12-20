@@ -74,6 +74,19 @@ describe('Game_Shop', () => {
     await expect(shopContract.connect(target).grantRole(ethers.utils.id('RANDOM_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
   });
 
+  it('Should transfer ownership and control', async () => {
+    await shopContract.deployed();
+
+    const newOwnerAddress = otherAddresses[0].address;
+
+    expect(await shopContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(true);
+    expect(await shopContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(false);
+    await shopContract.transferOwnershipControl(newOwnerAddress);
+    await expect(shopContract.transferOwnershipControl(newOwnerAddress)).to.be.reverted;
+    expect(await shopContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(false);
+    expect(await shopContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(true);
+  });
+
   /*
    * Offer Tests
    */

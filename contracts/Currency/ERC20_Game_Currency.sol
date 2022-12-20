@@ -207,7 +207,7 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
   }
 
   /**
-   * @dev Support for role control
+   * @dev Support for roles & control
    */
 
   function grantRole(bytes32 _role, address _account) public virtual override {
@@ -221,6 +221,12 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
     }
 
     _grantRole(_role, _account);
+  }
+
+  function transferOwnershipControl(address _newOwner) external onlyOwner {
+    transferOwnership(_newOwner);
+    _grantRole(DEFAULT_ADMIN_ROLE, _newOwner);
+    _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
   }
 
   /**

@@ -68,4 +68,6 @@ interface IGame_Shop is ISystem  {
   function withdrawTo(address _to) external;
   function withdrawCurrencyTo(address _currencyAddress, address _to) external;
   function withdrawItemsTo(address _collectionAddress, uint256[] calldata _itemIds, address _to) external;
+
+  function transferOwnershipControl(address _newOwner) external;
 }

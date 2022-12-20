@@ -234,7 +234,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
   }
 
   /**
-   * @dev Support for role control
+   * @dev Support for roles & control
    */
 
   function grantRole(bytes32 _role, address _account) public virtual override {
@@ -248,6 +248,12 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     }
 
     _grantRole(_role, _account);
+  }
+
+  function transferOwnershipControl(address _newOwner) external onlyOwner {
+    transferOwnership(_newOwner);
+    _grantRole(DEFAULT_ADMIN_ROLE, _newOwner);
+    _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
   }
 
   /**

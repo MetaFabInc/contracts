@@ -77,4 +77,6 @@ interface IGame_Lootbox_Manager is ISystem  {
   function claimLootboxes(uint256 _lootboxId) external;
   function removeLootbox(uint256 _lootboxId) external;
   function setClaimableBlockOffset(uint256 _offset) external;
+
+  function transferOwnershipControl(address _newOwner) external;
 }

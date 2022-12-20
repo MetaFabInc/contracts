@@ -69,6 +69,22 @@ describe('ERC1155_Game_Items_Collection', () => {
     await expect(itemsContract.transferOwnership(newOwnerAddress)).to.be.reverted;
   });
 
+  it('Should transfer ownership and control', async () => {
+    await itemsContract.deployed();
+
+    const newOwnerAddress = otherAddresses[0].address;
+
+    expect(await itemsContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(true);
+    expect(await itemsContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(false);
+    expect(await itemsContract.owner()).to.equal(owner.address);
+    await itemsContract.transferOwnershipControl(newOwnerAddress);
+    expect(await itemsContract.owner()).to.equal(newOwnerAddress);
+    await expect(itemsContract.transferOwnership(newOwnerAddress)).to.be.reverted;
+    await expect(itemsContract.transferOwnershipControl(newOwnerAddress)).to.be.reverted;
+    expect(await itemsContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(false);
+    expect(await itemsContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(true);
+  });
+
   /*
    * Metadata Tests
    */

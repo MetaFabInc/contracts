@@ -63,6 +63,19 @@ describe('Game_Lootbox_Manager', () => {
     await expect(lootboxManagerContract.connect(target).grantRole(ethers.utils.id('RANDOM_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
   });
 
+  it('Should transfer ownership and control', async () => {
+    await lootboxManagerContract.deployed();
+
+    const newOwnerAddress = otherAddresses[0].address;
+
+    expect(await lootboxManagerContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(true);
+    expect(await lootboxManagerContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(false);
+    await lootboxManagerContract.transferOwnershipControl(newOwnerAddress);
+    await expect(lootboxManagerContract.transferOwnershipControl(newOwnerAddress)).to.be.reverted;
+    expect(await lootboxManagerContract.hasRole(ethers.constants.HashZero, owner.address)).to.equal(false);
+    expect(await lootboxManagerContract.hasRole(ethers.constants.HashZero, newOwnerAddress)).to.equal(true);
+  });
+
   /*
    * Lootbox Tests
    */
