@@ -10,6 +10,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./IERC1155_Game_Items_Collection.sol";
@@ -17,7 +18,7 @@ import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
 import "../common/System.sol";
 
-contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC1155, ERC2771Context_Upgradeable, Roles, System, AccessControl {
+contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC1155, ERC2771Context_Upgradeable, Roles, System, AccessControl, Ownable {
   using Strings for uint256;
 
   uint256[] public itemIds;
@@ -32,7 +33,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
   ERC2771Context_Upgradeable(_forwarder)
   System(_systemId) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-    _setupRole(OWNER_ROLE, _msgSender());
+    _setupRole(MANAGER_ROLE, _msgSender());
   }
 
   function uri(uint256 _itemId) public view override returns (string memory) {
@@ -47,7 +48,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     itemBaseURI = _itemBaseURI;
   }
 
-  function setItemURI(uint256 _itemId, string memory _uri) external onlyRole(OWNER_ROLE) {
+  function setItemURI(uint256 _itemId, string memory _uri) external onlyRole(MANAGER_ROLE) {
     itemURIs[_itemId] = _uri;
     setItemIdExists(_itemId);
   }
@@ -56,7 +57,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
     return itemTransferTimelocks[_itemId] < block.timestamp;
   }
 
-  function setItemTransferTimelock(uint256 _itemId, uint256 _unlockTimestamp) external onlyRole(OWNER_ROLE) {
+  function setItemTransferTimelock(uint256 _itemId, uint256 _unlockTimestamp) external onlyRole(MANAGER_ROLE) {
     itemTransferTimelocks[_itemId] = _unlockTimestamp;
   }
 
@@ -179,7 +180,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
    * @dev Support for gasless transactions
    */
 
-  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(OWNER_ROLE) {
+  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(MANAGER_ROLE) {
     _upgradeTrustedForwarder(_newTrustedForwarder);
   }
 
@@ -212,7 +213,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
         (
           isItemTransferrable(id) ||
           from == address(0) || // allow mint
-          hasRole(OWNER_ROLE, from) || // allow owner transfers
+          hasRole(MANAGER_ROLE, from) || // allow manager transfers
           hasRole(MINTER_ROLE, from) || // allow minter transfers
           to == address(0) // allow burn
         ),
@@ -230,6 +231,23 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
         itemSupplies[id] = itemSupplies[id] - amounts[i];
       }
     }
+  }
+
+  /**
+   * @dev Support for role control
+   */
+
+  function grantRole(bytes32 _role, address _account) public virtual override {
+    bool isAdmin = hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    bool isManager = hasRole(MANAGER_ROLE, _msgSender());
+
+    require(isAdmin || isManager, "Role granting requires admin or manager role.");
+
+    if (_role == DEFAULT_ADMIN_ROLE || _role == MANAGER_ROLE) {
+      require(isAdmin, "Only admin can grant admin or manager role.");
+    }
+
+    _grantRole(_role, _account);
   }
 
   /**
@@ -256,7 +274,7 @@ contract ERC1155_Game_Items_Collection is IERC1155_Game_Items_Collection, ERC115
    */
 
   modifier canMint {
-    require(hasRole(OWNER_ROLE, _msgSender()) || hasRole(MINTER_ROLE, _msgSender()), "Not authorized to mint.");
+    require(hasRole(MANAGER_ROLE, _msgSender()) || hasRole(MINTER_ROLE, _msgSender()), "Not authorized to mint.");
     _;
   }
 

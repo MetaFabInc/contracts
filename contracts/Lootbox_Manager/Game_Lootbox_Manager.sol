@@ -32,7 +32,7 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
   ERC2771Context_Upgradeable(_forwarder)
   System(_systemId) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-    _setupRole(OWNER_ROLE, _msgSender());
+    _setupRole(MANAGER_ROLE, _msgSender());
   }
 
   /**
@@ -179,7 +179,7 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
     uint256[][2] calldata _inputOutputCollectionItemAmounts,  // 0: inputItemAmounts, 1: outputItemAmounts
     uint256[] calldata _outputCollectionItemWeights,
     uint256 _outputTotalItems
-  ) external onlyRole(OWNER_ROLE) {
+  ) external onlyRole(MANAGER_ROLE) {
     require(_inputOutputCollectionItemIds[0].length == _inputOutputCollectionItemAmounts[0].length, "Mismatched input item ids and amount lengths.");
     require(_inputOutputCollectionItemIds[1].length == _inputOutputCollectionItemAmounts[1].length, "Mismatched output item ids and amount length.");
     require(_inputOutputCollectionItemIds[1].length == _outputCollectionItemWeights.length, "Mismatch output item ids and item weights length.");
@@ -210,7 +210,7 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
     emit LootboxSet(_lootboxId, lootboxSet);
   }
 
-  function removeLootbox(uint256 _lootboxId) external onlyRole(OWNER_ROLE) {
+  function removeLootbox(uint256 _lootboxId) external onlyRole(MANAGER_ROLE) {
     lootboxIds.remove(_lootboxId);
 
     Lootbox storage lootboxRemoved = lootboxes[_lootboxId];
@@ -326,7 +326,7 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
    * for most implementations.
    */
 
-  function setClaimableBlockOffset(uint256 _offset) external onlyRole(OWNER_ROLE) {
+  function setClaimableBlockOffset(uint256 _offset) external onlyRole(MANAGER_ROLE) {
     require(_offset > 0, "Offset cannot be 0");
     claimableBlockOffset = _offset;
   }
@@ -335,7 +335,7 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
    * @dev Support for gasless transactions
    */
 
-  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(OWNER_ROLE) {
+  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(MANAGER_ROLE) {
     _upgradeTrustedForwarder(_newTrustedForwarder);
   }
 
@@ -345,6 +345,23 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
 
   function _msgData() internal view override(Context, ERC2771Context_Upgradeable) returns (bytes calldata) {
     return super._msgData();
+  }
+
+  /**
+   * @dev Support for role control
+   */
+
+  function grantRole(bytes32 _role, address _account) public virtual override {
+    bool isAdmin = hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    bool isManager = hasRole(MANAGER_ROLE, _msgSender());
+
+    require(isAdmin || isManager, "Role granting requires admin or manager role.");
+
+    if (_role == DEFAULT_ADMIN_ROLE || _role == MANAGER_ROLE) {
+      require(isAdmin, "Only admin can grant admin or manager role.");
+    }
+
+    _grantRole(_role, _account);
   }
 
   /**

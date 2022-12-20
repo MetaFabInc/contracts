@@ -30,7 +30,7 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
   ERC2771Context_Upgradeable(_forwarder)
   System(_systemId) {
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-    _setupRole(OWNER_ROLE, _msgSender());
+    _setupRole(MANAGER_ROLE, _msgSender());
   }
 
   /**
@@ -137,7 +137,7 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
     address[2] calldata _inputOutputCurrency,                 // 0: inputCurrency, 1: outputCurrency
     uint256[2] calldata _inputOutputCurrencyAmounts,          // 0: inputCurrencyAmounts, 1: outputCurrencyAmounts
     uint256 _maxUses
-  ) external onlyRole(OWNER_ROLE) {
+  ) external onlyRole(MANAGER_ROLE) {
     require(_inputOutputCollectionItemIds[0].length == _inputOutputCollectionItemAmounts[0].length, "Input items and amounts mismatched");
     require(_inputOutputCollectionItemIds[1].length == _inputOutputCollectionItemAmounts[1].length, "Output items and amounts mismatched");
 
@@ -164,7 +164,7 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
     emit OfferSet(_offerId, offerSet);
   }
 
-  function removeOffer(uint256 _offerId) external onlyRole(OWNER_ROLE) {
+  function removeOffer(uint256 _offerId) external onlyRole(MANAGER_ROLE) {
     offerIds.remove(_offerId);
 
     Offer storage offerRemoved = offers[_offerId];
@@ -221,17 +221,17 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
    * @dev Withdrawals
    */
 
-  function withdrawTo(address _to) external onlyRole(OWNER_ROLE) {
+  function withdrawTo(address _to) external onlyRole(MANAGER_ROLE) {
     payable(_to).transfer(address(this).balance);
   }
 
-  function withdrawCurrencyTo(address _currencyAddress, address _to) external onlyRole(OWNER_ROLE) {
+  function withdrawCurrencyTo(address _currencyAddress, address _to) external onlyRole(MANAGER_ROLE) {
     IERC20 currency = IERC20(_currencyAddress);
 
     currency.transfer(_to, currency.balanceOf(address(this)));
   }
 
-  function withdrawItemsTo(address _collectionAddress, uint256[] calldata _itemIds, address _to) external onlyRole(OWNER_ROLE) {
+  function withdrawItemsTo(address _collectionAddress, uint256[] calldata _itemIds, address _to) external onlyRole(MANAGER_ROLE) {
     IERC1155 items = IERC1155(_collectionAddress);
     uint256[] memory itemBalances = new uint256[](_itemIds.length);
 
@@ -252,7 +252,7 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
    * @dev Support for gasless transactions
    */
 
-  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(OWNER_ROLE) {
+  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(MANAGER_ROLE) {
     _upgradeTrustedForwarder(_newTrustedForwarder);
   }
 
@@ -262,6 +262,23 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
 
   function _msgData() internal view override(Context, ERC2771Context_Upgradeable) returns (bytes calldata) {
     return super._msgData();
+  }
+
+  /**
+   * @dev Support for role control
+   */
+
+  function grantRole(bytes32 _role, address _account) public virtual override {
+    bool isAdmin = hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    bool isManager = hasRole(MANAGER_ROLE, _msgSender());
+
+    require(isAdmin || isManager, "Role granting requires admin or manager role.");
+
+    if (_role == DEFAULT_ADMIN_ROLE || _role == MANAGER_ROLE) {
+      require(isAdmin, "Only admin can grant admin or manager role.");
+    }
+
+    _grantRole(_role, _account);
   }
 
   /**

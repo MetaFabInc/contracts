@@ -48,6 +48,21 @@ describe('Game_Lootbox_Manager', () => {
     await lootboxManagerContract.deployed();
   });
 
+  it('Should properly handle role management and assignments', async () => {
+    await lootboxManagerContract.deployed();
+
+    const manager = otherAddresses[0];
+    const target = otherAddresses[1];
+    const targetTwo = otherAddresses[2];
+
+    await lootboxManagerContract.grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), manager.address); // admin can assign manager
+    await lootboxManagerContract.connect(manager).grantRole(ethers.utils.id('METAFAB_MINTER_ROLE'), target.address); // manager can assign all non-admin/non-manager roles
+    await expect(lootboxManagerContract.connect(manager).grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), target.address)).to.be.reverted; // manager cannot assign manager role
+    await expect(lootboxManagerContract.connect(manager).grantRole(ethers.constants.HashZero, target.address)).to.be.reverted // manager cannot assign admin role
+    await expect(lootboxManagerContract.connect(target).grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
+    await expect(lootboxManagerContract.connect(target).grantRole(ethers.utils.id('RANDOM_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
+  });
+
   /*
    * Lootbox Tests
    */

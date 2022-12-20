@@ -83,6 +83,32 @@ describe('ERC20_Game_Currency', () => {
     expect(await tokenContract.balanceOf(recipientAddress)).to.equal(getTokenDecimalAmount(10));
   });
 
+  it('Should properly handle role management and assignments', async () => {
+    await tokenContract.deployed();
+
+    const manager = otherAddresses[0];
+    const target = otherAddresses[1];
+    const targetTwo = otherAddresses[2];
+
+    await tokenContract.grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), manager.address); // admin can assign manager
+    await tokenContract.connect(manager).grantRole(ethers.utils.id('METAFAB_MINTER_ROLE'), target.address); // manager can assign all non-admin/non-manager roles
+    await expect(tokenContract.connect(manager).grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), target.address)).to.be.reverted; // manager cannot assign manager role
+    await expect(tokenContract.connect(manager).grantRole(ethers.constants.HashZero, target.address)).to.be.reverted // manager cannot assign admin role
+    await expect(tokenContract.connect(target).grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
+    await expect(tokenContract.connect(target).grantRole(ethers.utils.id('RANDOM_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
+  });
+
+  it('Should transfer ownership', async () => {
+    await tokenContract.deployed();
+
+    const newOwnerAddress = otherAddresses[0].address;
+
+    expect(await tokenContract.owner()).to.equal(owner.address);
+    await tokenContract.transferOwnership(newOwnerAddress);
+    expect(await tokenContract.owner()).to.equal(newOwnerAddress);
+    await expect(tokenContract.transferOwnership(newOwnerAddress)).to.be.reverted;
+  });
+
   /*
    * Bridge Tests
    */

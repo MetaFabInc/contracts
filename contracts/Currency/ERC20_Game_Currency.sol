@@ -10,6 +10,7 @@
 pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IERC20_Game_Currency.sol";
@@ -17,7 +18,7 @@ import "../common/ERC2771Context_Upgradeable.sol";
 import "../common/Roles.sol";
 import "../common/System.sol";
 
-contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgradeable, Roles, System, AccessControl {
+contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgradeable, Roles, System, AccessControl, Ownable {
   uint256 public feeBps;
   uint256 public feeFixed;
   uint256 public feeCap;
@@ -32,7 +33,7 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
     feeRecipient = _msgSender();
     supplyCap = _supplyCap;
     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-    _setupRole(OWNER_ROLE, _msgSender());
+    _setupRole(MANAGER_ROLE, _msgSender());
   }
 
   function mint(address _to, uint256 _amount) external canMint {
@@ -124,7 +125,7 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
     _burn(_msgSender(), amount);
   }
 
-  function updateChildChainManager(address _childChainManagerProxy) external onlyRole(OWNER_ROLE) {
+  function updateChildChainManager(address _childChainManagerProxy) external onlyRole(MANAGER_ROLE) {
     childChainManagerProxy = _childChainManagerProxy;
   }
 
@@ -169,7 +170,7 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
     }
   }
 
-  function setFees(address recipient, uint256 _feeBps, uint256 _feeFixed, uint256 _feeCap) external onlyRole(OWNER_ROLE) {
+  function setFees(address recipient, uint256 _feeBps, uint256 _feeFixed, uint256 _feeCap) external onlyRole(MANAGER_ROLE) {
     require(recipient != address(0), "recipient is 0 addr");
     feeRecipient = recipient;
     feeBps = _feeBps;
@@ -181,7 +182,7 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
    * @dev Support for gasless transactions
    */
 
-  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(OWNER_ROLE) {
+  function upgradeTrustedForwarder(address _newTrustedForwarder) external onlyRole(MANAGER_ROLE) {
     _upgradeTrustedForwarder(_newTrustedForwarder);
   }
 
@@ -206,6 +207,23 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
   }
 
   /**
+   * @dev Support for role control
+   */
+
+  function grantRole(bytes32 _role, address _account) public virtual override {
+    bool isAdmin = hasRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    bool isManager = hasRole(MANAGER_ROLE, _msgSender());
+
+    require(isAdmin || isManager, "Role granting requires admin or manager role.");
+
+    if (_role == DEFAULT_ADMIN_ROLE || _role == MANAGER_ROLE) {
+      require(isAdmin, "Only admin can grant admin or manager role.");
+    }
+
+    _grantRole(_role, _account);
+  }
+
+  /**
    * @dev ERC165
    */
 
@@ -218,7 +236,7 @@ contract ERC20_Game_Currency is IERC20_Game_Currency, ERC20, ERC2771Context_Upgr
    */
 
   modifier canMint {
-    require(hasRole(OWNER_ROLE, _msgSender()) || hasRole(MINTER_ROLE, _msgSender()), "Not authorized to mint.");
+    require(hasRole(MANAGER_ROLE, _msgSender()) || hasRole(MINTER_ROLE, _msgSender()), "Not authorized to mint.");
     _;
   }
 }

@@ -10,6 +10,6 @@
 pragma solidity ^0.8.16;
 
 contract Roles {
+  bytes32 internal constant MANAGER_ROLE = keccak256("METAFAB_MANAGER_ROLE");
   bytes32 internal constant MINTER_ROLE = keccak256("METAFAB_MINTER_ROLE");
-  bytes32 internal constant OWNER_ROLE = keccak256("METAFAB_OWNER_ROLE");
 }

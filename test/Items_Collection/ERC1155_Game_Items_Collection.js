@@ -43,6 +43,32 @@ describe('ERC1155_Game_Items_Collection', () => {
     await itemsContract.deployed();
   });
 
+  it('Should properly handle role management and assignments', async () => {
+    await itemsContract.deployed();
+
+    const manager = otherAddresses[0];
+    const target = otherAddresses[1];
+    const targetTwo = otherAddresses[2];
+
+    await itemsContract.grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), manager.address); // admin can assign manager
+    await itemsContract.connect(manager).grantRole(ethers.utils.id('METAFAB_MINTER_ROLE'), target.address); // manager can assign all non-admin/non-manager roles
+    await expect(itemsContract.connect(manager).grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), target.address)).to.be.reverted; // manager cannot assign manager role
+    await expect(itemsContract.connect(manager).grantRole(ethers.constants.HashZero, target.address)).to.be.reverted // manager cannot assign admin role
+    await expect(itemsContract.connect(target).grantRole(ethers.utils.id('METAFAB_MANAGER_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
+    await expect(itemsContract.connect(target).grantRole(ethers.utils.id('RANDOM_ROLE'), targetTwo.address)).to.be.reverted; // random address cannot assign roles
+  });
+
+  it('Should transfer ownership', async () => {
+    await itemsContract.deployed();
+
+    const newOwnerAddress = otherAddresses[0].address;
+
+    expect(await itemsContract.owner()).to.equal(owner.address);
+    await itemsContract.transferOwnership(newOwnerAddress);
+    expect(await itemsContract.owner()).to.equal(newOwnerAddress);
+    await expect(itemsContract.transferOwnership(newOwnerAddress)).to.be.reverted;
+  });
+
   /*
    * Metadata Tests
    */
