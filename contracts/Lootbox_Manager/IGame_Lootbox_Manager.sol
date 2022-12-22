@@ -48,6 +48,7 @@ interface IGame_Lootbox_Manager is ISystem  {
   event LootboxRemoved(uint256 indexed lootboxId, Lootbox lootbox);
 
   // function
+  function claimableBlockOffset() external view returns (uint256);
   function allLootboxIds() external view returns (uint256[] memory);
   function allLootboxes() external view returns (Lootbox[] memory);
   function allOpenedLootboxes(address _address, uint256 _lootboxId) external view returns (OpenedLootbox[] memory);

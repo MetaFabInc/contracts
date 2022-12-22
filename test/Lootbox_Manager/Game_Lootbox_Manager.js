@@ -80,6 +80,12 @@ describe('Game_Lootbox_Manager', () => {
    * Lootbox Tests
    */
 
+  it('Should return current claimable block offset', async () => {
+    await lootboxManagerContract.deployed();
+
+    expect(await lootboxManagerContract.claimableBlockOffset()).to.equal(2);
+  });
+
   it('Should set lootbox that requires lootbox item and gives random items', async () => {
     const inputCollectionItemIds = [ 1, 7 ];
     const inputCollectionItemAmounts = [ 2, 3 ];
