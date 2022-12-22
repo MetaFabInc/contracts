@@ -26,7 +26,7 @@ contract Game_Lootbox_Manager is IGame_Lootbox_Manager, ERC2771Context_Upgradeab
   EnumerableSet.UintSet private lootboxIds;
   mapping(uint256 => Lootbox) private lootboxes;
   mapping(address => mapping(uint256 => OpenedLootbox[])) private openedLootboxes; // addr -> lootboxId -> OpenedLootbox[]
-  uint256 claimableBlockOffset = 1;
+  uint256 claimableBlockOffset = 2;
 
   constructor(address _forwarder, bytes32 _systemId)
   ERC2771Context_Upgradeable(_forwarder)
