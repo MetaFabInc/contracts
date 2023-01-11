@@ -31,6 +31,9 @@ module.exports = {
     arbitrum: {
       url: '',
     },
+    arbitrumNova: {
+      url: 'https://nova.arbitrum.io/rpc',
+    },
     arbitrumGoerli: {
       url: '',
     }
@@ -42,17 +45,25 @@ module.exports = {
     pretty: true,
   },
   etherscan: {
-    apiKey: '',
+    apiKey: 'VUV9MN1SBXZH9WXBR9PU49H53KZ56KWDYS',
     customChains: [
-    {
-      network: "arbitrumGoerli",
-      chainId: 421613,
-      urls: {
-        apiURL: "https://api-goerli.arbiscan.io/api",
-        browserURL: "https://goerli.arbiscan.io/"
+      {
+        network: "arbitrumGoerli",
+        chainId: 421613,
+        urls: {
+          apiURL: "https://api-goerli.arbiscan.io/api",
+          browserURL: "https://goerli.arbiscan.io/"
+        }
+      },
+      {
+        network: "arbitrumNova",
+        chainId: 42170,
+        urls: {
+          apiURL: 'https://api-nova.arbiscan.io/api',
+          browserURL: 'https://nova.arbiscan.io/',
+        },
       }
-    }
-  ]
+    ]
   },
   mocha: {
     timeout: 60 * 60 * 1000,
