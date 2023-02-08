@@ -36,7 +36,13 @@ module.exports = {
     },
     arbitrumGoerli: {
       url: '',
-    }
+    },
+    thundercore: {
+      url: '',
+    },
+    thundercoreTestnet: {
+      url: '',
+    },
   },
   abiExporter: {
     path: './abi',
@@ -62,7 +68,7 @@ module.exports = {
           apiURL: 'https://api-nova.arbiscan.io/api',
           browserURL: 'https://nova.arbiscan.io/',
         },
-      }
+      },
     ]
   },
   mocha: {
