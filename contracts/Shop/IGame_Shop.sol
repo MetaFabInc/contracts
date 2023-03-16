@@ -36,7 +36,7 @@ interface IGame_Shop is ISystem  {
   }
 
   // events
-  event OfferUsed(uint256 indexed offerId, Offer offer, address user);
+  event OfferUsed(uint256 indexed offerId, Offer offer, uint256 times, address user);
   event OfferSet(uint256 indexed offerId, Offer offer);
   event OfferRemoved(uint256 indexed offerId, Offer offer);
 
@@ -64,6 +64,7 @@ interface IGame_Shop is ISystem  {
   ) external;
   function removeOffer(uint256 _offerId) external;
   function useOffer(uint256 _offerId) external payable;
+  function useOfferMulti(uint256 _offerId, uint256 _times) external payable;
 
   function withdrawTo(address _to) external;
   function withdrawCurrencyTo(address _currencyAddress, address _to) external;

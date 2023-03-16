@@ -274,6 +274,12 @@
         },
         {
           "indexed": false,
+          "internalType": "uint256",
+          "name": "times",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
           "internalType": "address",
           "name": "user",
           "type": "address"
@@ -770,6 +776,24 @@
         }
       ],
       "name": "useOffer",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_offerId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_times",
+          "type": "uint256"
+        }
+      ],
+      "name": "useOfferMulti",
       "outputs": [],
       "stateMutability": "payable",
       "type": "function"

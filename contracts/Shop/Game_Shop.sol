@@ -175,46 +175,56 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
   }
 
   function useOffer(uint256 _offerId) external payable nonReentrant {
+    _useOffer(_offerId, 1);
+  }
+
+  function useOfferMulti(uint256 _offerId, uint256 _times) external payable nonReentrant {
+    require(_times > 0, "times cannot be 0");
+    _useOffer(_offerId, _times);
+  }
+
+  function _useOffer(uint256 _offerId, uint256 _times) private {
     require(offerIds.contains(_offerId), "offerId does not exist or has been removed.");
 
     Offer storage offerUsed = offers[_offerId];
-    require(offerUsed.maxUses == 0 || offerUsed.uses < offerUsed.maxUses, "Offer has reached max uses.");
+    require(offerUsed.maxUses == 0 || offerUsed.uses + _times <= offerUsed.maxUses, "Offer would reach max uses.");
 
     if (address(offerUsed.inputCollection) != address(0)) {
-      offerUsed.inputCollection.safeBatchTransferFrom(_msgSender(), address(this), offerUsed.inputCollectionItemIds, offerUsed.inputCollectionItemAmounts, "");
+      offerUsed.inputCollection.safeBatchTransferFrom(_msgSender(), address(this), offerUsed.inputCollectionItemIds, _multiplyUint256Array(offerUsed.inputCollectionItemAmounts, _times) , "");
     }
 
     if (offerUsed.inputCurrencyAmount > 0) {
       if (address(offerUsed.inputCurrency) != address(0)) {
-        offerUsed.inputCurrency.transferFrom(_msgSender(), address(this), offerUsed.inputCurrencyAmount);
+        offerUsed.inputCurrency.transferFrom(_msgSender(), address(this), offerUsed.inputCurrencyAmount * _times);
       } else {
-        require(msg.value >= offerUsed.inputCurrencyAmount, "Payment less than cost");
+        require(msg.value >= offerUsed.inputCurrencyAmount * _times, "Payment less than cost");
       }
     }
 
     if (address(offerUsed.outputCollection) != address(0)) {
       if (_shopCanMint(address(offerUsed.outputCollection))) {
         IERC1155_Game_Items_Collection gameItemsCollection = IERC1155_Game_Items_Collection(address(offerUsed.outputCollection));
-        gameItemsCollection.mintBatchToAddress(_msgSender(), offerUsed.outputCollectionItemIds, offerUsed.outputCollectionItemAmounts);
+        gameItemsCollection.mintBatchToAddress(_msgSender(), offerUsed.outputCollectionItemIds, _multiplyUint256Array(offerUsed.outputCollectionItemAmounts, _times));
       } else {
-        offerUsed.outputCollection.safeBatchTransferFrom(address(this), _msgSender(), offerUsed.outputCollectionItemIds, offerUsed.outputCollectionItemAmounts, "");
+        offerUsed.outputCollection.safeBatchTransferFrom(address(this), _msgSender(), offerUsed.outputCollectionItemIds, _multiplyUint256Array(offerUsed.outputCollectionItemAmounts, _times), "");
       }
     }
 
     if (address(offerUsed.outputCurrency) != address(0)) {
       if (_shopCanMint(address(offerUsed.outputCurrency))) {
         IERC20_Game_Currency gameCurrency = IERC20_Game_Currency(address(offerUsed.outputCurrency));
-        gameCurrency.mint(_msgSender(), offerUsed.outputCurrencyAmount);
+        gameCurrency.mint(_msgSender(), offerUsed.outputCurrencyAmount * _times);
       } else {
-        offerUsed.outputCurrency.transfer(_msgSender(), offerUsed.outputCurrencyAmount);
+        offerUsed.outputCurrency.transfer(_msgSender(), offerUsed.outputCurrencyAmount * _times);
       }
     } else if (offerUsed.outputCurrencyAmount > 0) {
-      payable(_msgSender()).transfer(offerUsed.outputCurrencyAmount);
+      payable(_msgSender()).transfer(offerUsed.outputCurrencyAmount * _times);
     }
 
-    offerUsed.uses++;
+    offerUsed.uses += _times;
+    offerUsed.lastUpdatedAt = block.timestamp;
 
-    emit OfferUsed(_offerId, offerUsed, _msgSender());
+    emit OfferUsed(_offerId, offerUsed, _times, _msgSender());
   }
 
   /**
@@ -305,5 +315,19 @@ contract Game_Shop is IGame_Shop, ERC2771Context_Upgradeable, Roles, System, Acc
     IAccessControl accessControlCheck = IAccessControl(_contractAddress);
 
     return accessControlCheck.hasRole(MINTER_ROLE, address(this));
+  }
+
+  function _multiplyUint256Array(uint256[] memory _uintArray, uint256 _multiplier) private pure returns (uint256[] memory) {
+    if (_multiplier == 1) {
+      return _uintArray;
+    }
+
+    uint256[] memory mutlipliedArray = new uint256[](_uintArray.length);
+
+    for (uint256 i = 0; i < _uintArray.length; i++) {
+      mutlipliedArray[i] = _uintArray[i] * _multiplier;
+    }
+
+    return mutlipliedArray;
   }
 }

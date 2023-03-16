@@ -457,6 +457,196 @@ describe('Game_Shop', () => {
     expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(1);
   });
 
+  it('Should process multi use offer that requires currency and give/mints items and increment uses', async () => {
+    const itemPrice = getTokenDecimalAmount(10);
+
+    const offerId = 55563;
+
+    await setGenericOffer({
+      offerId,
+      inputCurrencyAmount: itemPrice,
+      outputCollectionItemIds: [ 22, 53 ],
+      canMint: true,
+    });
+
+    const user = otherAddresses[0];
+    const offer = await shopContract.offer(offerId);
+
+    await tokenContract.mint(user.address, itemPrice.mul(2));
+    await tokenContract.connect(user).approve(shopContract.address, itemPrice.mul(2));
+    await shopContract.connect(user).useOfferMulti(offerId, 2);
+
+    expect(await tokenContract.balanceOf(user.address) * 1).to.equal(0);
+    expect(await tokenContract.balanceOf(shopContract.address) * 1).to.equal(itemPrice.mul(2) * 1);
+    expect((await shopContract.offer(offerId)).uses).to.equal(2);
+    expect(await itemsContract.balanceOf(user.address, offer.outputCollectionItemIds[0]) * 1).to.equal(2);
+    expect(await itemsContract.balanceOf(user.address, offer.outputCollectionItemIds[1]) * 1).to.equal(2);
+  });
+
+  it('Should process multi use offer that gives/transfers items', async () => {
+    const itemPrice = getTokenDecimalAmount(10);
+    const offerId = 76799;
+
+    await setGenericOffer({
+      offerId,
+      inputCurrencyAmount: itemPrice,
+      outputCollectionItemIds: [ 1 ],
+      canMint: false,
+    });
+
+    const user = otherAddresses[0];
+    const offer = await shopContract.offer(offerId);
+    const itemId = offer.outputCollectionItemIds[0];
+
+    await tokenContract.mint(user.address, itemPrice.mul(2));
+    await tokenContract.connect(user).approve(shopContract.address, itemPrice.mul(2));
+    await itemsContract.mintToAddress(shopContract.address, itemId, 2);
+    await shopContract.connect(user).useOfferMulti(offerId, 2);
+
+    expect(await tokenContract.balanceOf(user.address) * 1).to.equal(0);
+    expect((await tokenContract.balanceOf(shopContract.address)).toString()).to.equal(itemPrice.mul(2).toString());
+    expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(2);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(0);
+    expect((await shopContract.offer(offerId)).uses).to.equal(2);
+  });
+
+  it('Should process multi use offer that requires items and mints/gives currency and increment uses', async () => {
+    const sellPrice = getTokenDecimalAmount(15);
+    const offerId = 995532;
+
+    await setGenericOffer({
+      offerId,
+      outputCurrencyAmount: sellPrice,
+      inputCollectionItemIds: [ 1 ],
+      canMint: true,
+    });
+
+    const user = otherAddresses[0];
+    const offer = await shopContract.offer(offerId);
+    const itemId = offer.inputCollectionItemIds[0];
+
+    await itemsContract.mintToAddress(user.address, itemId, 2);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await shopContract.connect(user).useOfferMulti(offerId, 2);
+
+    expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(2);
+    expect((await shopContract.offer(offerId)).uses).to.equal(2);
+    expect(await tokenContract.balanceOf(user.address) * 1).to.equal(sellPrice * 2);
+  });
+
+  it('Should process multi use offer that requires items and transfers/gives currency', async () => {
+    const sellPrice = getTokenDecimalAmount(15);
+    const offerId = 43;
+
+    await setGenericOffer({
+      offerId,
+      outputCurrencyAmount: sellPrice,
+      inputCollectionItemIds: [ 1 ],
+      canMint: false,
+    });
+
+    const user = otherAddresses[0];
+    const offer = await shopContract.offer(offerId);
+    const itemId = offer.inputCollectionItemIds[0];
+
+    await itemsContract.mintToAddress(user.address, itemId, 2);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await tokenContract.mint(shopContract.address, sellPrice.mul(2));
+    await shopContract.connect(user).useOfferMulti(offerId, 2);
+
+    expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(2);
+    expect(await tokenContract.balanceOf(user.address) * 1).to.equal(sellPrice * 2);
+    expect(await tokenContract.balanceOf(shopContract.address) * 1).to.equal(0);
+    expect((await shopContract.offer(offerId)).uses).to.equal(2);
+  });
+
+  it('Should process multi use offer that requires items and mints/gives items', async () => {
+    const offerId = 43;
+
+    await setGenericOffer({
+      offerId,
+      inputCollectionItemIds: [ 1, 2 ],
+      outputCollectionItemIds: [ 3 ],
+      canMint: true,
+    });
+
+    const user = otherAddresses[0];
+    const offer = await shopContract.offer(offerId);
+    const inputItemIdOne = offer.inputCollectionItemIds[0];
+    const inputItemIdTwo = offer.inputCollectionItemIds[1];
+    const outputItemId = offer.outputCollectionItemIds[0];
+
+    await itemsContract.mintToAddress(user.address, inputItemIdOne, 2);
+    await itemsContract.mintToAddress(user.address, inputItemIdTwo, 2);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await shopContract.connect(user).useOfferMulti(offerId, 2);
+
+    expect(await itemsContract.balanceOf(user.address, inputItemIdOne) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(user.address, inputItemIdTwo) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(user.address, outputItemId) * 1).to.equal(2);
+    expect((await shopContract.offer(offerId)).uses).to.equal(2);
+  });
+
+  it('Should process multi use offer requiring native chain token', async () => {
+    const itemPrice = getTokenDecimalAmount(5);
+    const itemId = 3;
+    const offerId = 542;
+
+    await setOffer({
+      offerId,
+      inputCurrencyAmount: itemPrice,
+      outputCollection: itemsContract.address,
+      outputCollectionItemIds: [ itemId ],
+      outputCollectionItemAmounts: [ 1 ],
+      canMint: true,
+    });
+
+    const user = otherAddresses[0];
+    const userStartBalance = await user.getBalance() * 1; // 10000~
+
+    await shopContract.connect(user).useOfferMulti(offerId, 2, {
+      value: itemPrice.mul(2),
+    });
+
+    expect(await user.getBalance() * 1).to.be.below(userStartBalance - itemPrice * 2); // less price + gas
+    expect(await user.provider.getBalance(shopContract.address) * 1).to.equal(itemPrice * 2);
+    expect(await itemsContract.balanceOf(user.address, itemId) * 1).to.equal(2);
+  });
+
+  it('Should process multi use offer receiving native chain token', async () => {
+    const sellPrice = getTokenDecimalAmount(2);
+    const itemId = 3;
+    const offerId = 765;
+
+    await setOffer({
+      offerId,
+      inputCollection: itemsContract.address,
+      inputCollectionItemIds: [ itemId ],
+      inputCollectionItemAmounts: [ 1 ],
+      outputCurrencyAmount: sellPrice,
+      canMint: true,
+    });
+
+    const user = otherAddresses[0];
+    const userStartBalance = await user.getBalance() * 1; // 10000~
+
+    // fund merchant
+    await owner.sendTransaction({
+      to: shopContract.address,
+      value: ethers.utils.parseEther('4.0'),
+    });
+
+    await itemsContract.mintToAddress(user.address, itemId, 2);
+    await itemsContract.connect(user).setApprovalForAll(shopContract.address, true);
+    await shopContract.connect(user).useOfferMulti(offerId, 2);
+
+    expect(await user.getBalance() * 1).to.be.above(userStartBalance);
+    expect(await user.provider.getBalance(shopContract.address) * 1).to.equal(0);
+    expect(await itemsContract.balanceOf(shopContract.address, itemId) * 1).to.equal(2);
+  });
+
   it('Fails to use offer when not approved to mint items and merchant does not own items to fulfill', async () => {
     const itemPrice = getTokenDecimalAmount(10);
     const offerId = 8568;
