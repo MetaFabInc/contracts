@@ -43,7 +43,22 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
       keccak256(abi.encode(_TYPEHASH, req.from, req.to, req.value, req.gas, req.nonce, keccak256(req.data)))
     ).recover(signature);
 
-    return !_nonces[req.from][req.nonce] && (signer == req.from || systemDelegateApprover.isDelegateApprovedForSystem(req.from, ISystem(req.to).systemId(), signer));
+    if (_nonces[req.from][req.nonce]) {
+      return false;
+    }
+
+    if (signer == req.from) {
+      return true;
+    }
+
+    bytes32[] memory supportedSystemIds = ISystem(req.to).supportedSystemIds();
+    for (uint256 i = 0; i < supportedSystemIds.length; i++) {
+      if (systemDelegateApprover.isDelegateApprovedForSystem(req.from, supportedSystemIds[i], signer)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {

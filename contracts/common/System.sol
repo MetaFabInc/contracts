@@ -10,11 +10,35 @@
 pragma solidity ^0.8.16;
 
 import "./ISystem.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract System is ISystem {
-  bytes32 public systemId;
+  using EnumerableSet for EnumerableSet.Bytes32Set;
+  EnumerableSet.Bytes32Set private systemIds;
+  bytes32 private initializedSystemId;
 
   constructor(bytes32 _systemId) {
-    systemId = _systemId;
+    systemIds.add(_systemId);
+    initializedSystemId = _systemId;
+  }
+
+  function addSystemId(bytes32 _systemId) external {
+    systemIds.add(_systemId);
+  }
+
+  function removeSystemId(bytes32 _systemId) external {
+    systemIds.remove(_systemId);
+  }
+
+  function systemId() public view returns (bytes32) { // returns the initialized systemId (legacy)
+    return initializedSystemId;
+  }
+
+  function supportsSystemId(bytes32 _systemId) public view returns (bool) {
+    return systemIds.contains(_systemId);
+  }
+
+  function supportedSystemIds() public view returns (bytes32[] memory) {
+    return systemIds.values();
   }
 }

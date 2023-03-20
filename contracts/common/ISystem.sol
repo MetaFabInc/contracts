@@ -10,5 +10,9 @@
 pragma solidity ^0.8.16;
 
 interface ISystem {
-  function systemId() external view returns (bytes32);
+  function addSystemId(bytes32 _systemId) external;
+  function removeSystemId(bytes32 _systemId) external;
+  function systemId() external view returns (bytes32); // legacy, initialized systemId
+  function supportsSystemId(bytes32 _systemId) external view returns (bool);
+  function supportedSystemIds() external view returns (bytes32[] memory);
 }

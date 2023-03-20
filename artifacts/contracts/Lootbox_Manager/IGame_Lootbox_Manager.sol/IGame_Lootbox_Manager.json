@@ -358,6 +358,19 @@
       "type": "event"
     },
     {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_systemId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "addSystemId",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "allLootboxIds",
       "outputs": [
@@ -952,6 +965,19 @@
     {
       "inputs": [
         {
+          "internalType": "bytes32",
+          "name": "_systemId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "removeSystemId",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "_offset",
           "type": "uint256"
@@ -998,6 +1024,38 @@
       "name": "setLootbox",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "supportedSystemIds",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_systemId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "supportsSystemId",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {

@@ -122,6 +122,19 @@
       "type": "event"
     },
     {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_systemId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "addSystemId",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "allItemIds",
       "outputs": [
@@ -554,6 +567,19 @@
     {
       "inputs": [
         {
+          "internalType": "bytes32",
+          "name": "_systemId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "removeSystemId",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "from",
           "type": "address"
@@ -685,6 +711,19 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "supportedSystemIds",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "bytes4",
@@ -693,6 +732,25 @@
         }
       ],
       "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_systemId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "supportsSystemId",
       "outputs": [
         {
           "internalType": "bool",
