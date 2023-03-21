@@ -70,6 +70,10 @@ contract ERC2771_Trusted_Forwarder is EIP712 {
       abi.encodePacked(req.data, req.from)
     );
 
+    if (!success) {
+      assembly { revert(add(returndata, 0x20), mload(returndata)) }
+    }
+
     // Validate that the relayer has sent enough gas for the call.
     // See https://ronan.eth.link/blog/ethereum-gas-dangers/
     assert(gasleft() > req.gas / 63);

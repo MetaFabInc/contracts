@@ -457,6 +457,68 @@ describe('ERC20_Game_Currency', () => {
       }
     });
 
+    it('Should properly revert from a call level revert of target contract', async () => {
+      await tokenContract.deployed();
+      await forwarderContract.deployed();
+
+      const chainId = 31337; // hardhat
+      const sender = otherAddresses[1];
+      const recipient = otherAddresses[2];
+      const transferAmount = getTokenDecimalAmount(500);
+
+      const mintAmount = getTokenDecimalAmount(1250);
+
+      // mint sender some tokens to transfer
+      await tokenContract.mint(sender.address, mintAmount);
+
+      // create request object
+      const gasEstimate = await tokenContract.connect(sender).estimateGas.transferWithFee(recipient.address, transferAmount);
+      const callData = tokenContract.interface.encodeFunctionData('transferWithFee', [
+        recipient.address,
+        transferAmount.mul(20),
+      ]);
+
+      const forwardRequest = {
+        from: sender.address,
+        to: tokenContract.address,
+        value: getTokenDecimalAmount(0),
+        gas: gasEstimate,
+        nonce: getTokenDecimalAmount(1), // uint256
+        data: callData,
+      };
+
+      // Sign message
+      const domain = {
+        chainId,
+        name: 'ERC2771_Trusted_Forwarder',
+        verifyingContract: forwarderContract.address,
+        version: '1.0.0',
+      };
+
+      const types = {
+        ForwardRequest: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'gas', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'data', type: 'bytes' },
+        ],
+      };
+
+      const signature = await sender._signTypedData(
+        domain,
+        types,
+        forwardRequest,
+      );
+
+      // Execute forwarded transaction, check correct balances
+      const externalAccount = owner;
+      const externalAccountBalance = await externalAccount.getBalance() * 1;
+
+      await expect(forwarderContract.connect(externalAccount).execute(forwardRequest, signature)).to.be.reverted;
+    });
+
     it('Should cover sender gas fees when submitting transferWithFeeRef transaction to forwarder', async () => {
       await tokenContract.deployed();
 
